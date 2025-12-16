@@ -1,0 +1,54 @@
+{
+  "best_model_name": "Random_Forest",
+  "best_model_type": "RandomForestClassifier",
+  "metrics": {
+    "accuracy": 1.0,
+    "precision": 1.0,
+    "recall": 1.0,
+    "f1_score": 1.0,
+    "roc_auc": 1.0,
+    "true_negatives": 100000.0,
+    "false_positives": 0.0,
+    "false_negatives": 0.0,
+    "true_positives": 66667.0,
+    "fraud_detection_rate": 1.0,
+    "false_alarm_rate": 0.0,
+    "training_time_seconds": 22.330404
+  },
+  "training_date": "2025-12-16 21:55:34",
+  "all_models_comparison": {
+    "Logistic_Regression": {
+      "f1_score": 0.9988304093567252,
+      "roc_auc": 0.9995422178889106,
+      "accuracy": 0.9990640018719963
+    },
+    "Random_Forest": {
+      "f1_score": 1.0,
+      "roc_auc": 1.0,
+      "accuracy": 1.0
+    },
+    "XGBoost": {
+      "f1_score": 1.0,
+      "roc_auc": 1.0,
+      "accuracy": 1.0
+    },
+    "LightGBM": {
+      "f1_score": 1.0,
+      "roc_auc": 1.0,
+      "accuracy": 1.0
+    }
+  },
+  "feature_names": [
+    "step",
+    "type",
+    "amount",
+    "nameOrig",
+    "oldbalanceOrg",
+    "newbalanceOrig",
+    "nameDest",
+    "oldbalanceDest",
+    "newbalanceDest",
+    "isFlaggedFraud"
+  ],
+  "n_features": 10
+}

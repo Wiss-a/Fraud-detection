@@ -1,0 +1,7 @@
+{
+    "service_name": "fraud-detection-api",
+    "scoring_uri": null,
+    "state": "Transitioning",
+    "primary_key": "zohXaezSGpYxcpkePCMh7vh7Dzb4mtXD",
+    "deployment_date": "2025-12-16 22:31:24.289496"
+}
