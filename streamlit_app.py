@@ -1,27 +1,18 @@
 """
 ================================================================================
-PARTIE 9: INTERFACE UTILISATEUR STREAMLIT
-Application Web Interactive pour la Détection de Fraude
-================================================================================
-
-Instructions d'installation:
-pip install streamlit pandas numpy plotly requests
-
-Pour lancer l'application:
-streamlit run streamlit_app.py
-
+STREAMLIT APP - DÉTECTION DE FRAUDE (MODE LOCAL UNIQUEMENT)
+Version adaptée pour compte étudiant sans Azure ML
 ================================================================================
 """
 
 import streamlit as st
 import pandas as pd
 import numpy as np
-import requests
-import json
 import plotly.graph_objects as go
 import plotly.express as px
 from datetime import datetime
-import time
+import joblib
+import os
 
 # =============================================================================
 # CONFIGURATION DE LA PAGE
@@ -50,13 +41,6 @@ st.markdown("""
         text-align: center;
         color: #7f8c8d;
         margin-bottom: 2rem;
-    }
-    .metric-card {
-        background-color: #f8f9fa;
-        padding: 1.5rem;
-        border-radius: 10px;
-        border-left: 5px solid #3498db;
-        margin: 1rem 0;
     }
     .alert-fraud {
         background-color: #fee;
@@ -91,47 +75,43 @@ st.markdown("""
 """, unsafe_allow_html=True)
 
 # =============================================================================
-# FONCTIONS UTILITAIRES
+# CHARGEMENT DU MODÈLE
 # =============================================================================
 
-@st.cache_data
-def load_deployment_info():
-    """Charge les informations de déploiement"""
+@st.cache_resource
+def load_model_and_scaler():
+    """Charge le modèle et le scaler une seule fois"""
     try:
-        with open('outputs/deployment_info.json', 'r') as f:
-            return json.load(f)
-    except:
-        return None
-
-def predict_fraud_api(data, scoring_uri, api_key):
-    """Fait une prédiction via l'API Azure ML"""
-    headers = {
-        'Content-Type': 'application/json',
-        'Authorization': f'Bearer {api_key}'
-    }
-    
-    try:
-        response = requests.post(
-            scoring_uri,
-            data=json.dumps(data),
-            headers=headers,
-            timeout=30
-        )
+        # Essayer plusieurs chemins possibles
+        possible_paths = [
+            ('outputs/best_model.pkl', 'outputs/scaler.pkl'),
+            ('best_model.pkl', 'scaler.pkl'),
+            ('./outputs/best_model.pkl', './outputs/scaler.pkl')
+        ]
         
-        if response.status_code == 200:
-            return response.json(), None
-        else:
-            return None, f"Erreur HTTP {response.status_code}: {response.text}"
-            
+        for model_path, scaler_path in possible_paths:
+            if os.path.exists(model_path) and os.path.exists(scaler_path):
+                model = joblib.load(model_path)
+                scaler = joblib.load(scaler_path)
+                return model, scaler, None
+        
+        return None, None, "❌ Fichiers modèle non trouvés. Assurez-vous que 'best_model.pkl' et 'scaler.pkl' sont dans le dossier 'outputs/'."
+        
     except Exception as e:
-        return None, f"Erreur de connexion: {str(e)}"
+        return None, None, f"❌ Erreur lors du chargement: {str(e)}"
+
+# Charger le modèle au démarrage
+model, scaler, error = load_model_and_scaler()
+
+# =============================================================================
+# FONCTIONS DE PRÉDICTION
+# =============================================================================
 
 def predict_fraud_local(data):
-    """Prédiction locale (si modèle disponible localement)"""
+    """Prédiction locale"""
     try:
-        import joblib
-        model = joblib.load('outputs/best_model.pkl')
-        scaler = joblib.load('outputs/scaler.pkl')
+        if model is None or scaler is None:
+            return None, "Modèle non chargé"
         
         input_array = np.array(data['data'])
         scaled_data = scaler.transform(input_array)
@@ -157,16 +137,15 @@ def predict_fraud_local(data):
         }, None
         
     except Exception as e:
-        return None, f"Erreur locale: {str(e)}"
+        return None, f"Erreur: {str(e)}"
 
 def create_gauge_chart(value, title):
     """Crée une jauge pour afficher la probabilité"""
     fig = go.Figure(go.Indicator(
-        mode="gauge+number+delta",
+        mode="gauge+number",
         value=value * 100,
         domain={'x': [0, 1], 'y': [0, 1]},
         title={'text': title, 'font': {'size': 20}},
-        delta={'reference': 50},
         gauge={
             'axis': {'range': [None, 100], 'tickwidth': 1},
             'bar': {'color': "darkblue"},
@@ -192,61 +171,45 @@ def create_gauge_chart(value, title):
 
 st.markdown('<h1 class="main-header">🔍 Système de Détection de Fraude Bancaire</h1>', 
             unsafe_allow_html=True)
-st.markdown('<p class="sub-header">Projet CDDA - Azure Machine Learning</p>', 
+st.markdown('<p class="sub-header">Projet CDDA - Mode Local</p>', 
             unsafe_allow_html=True)
 
+# Afficher un message si le modèle n'est pas chargé
+if error:
+    st.error(error)
+    st.info("""
+    **📁 Pour utiliser cette application, vous devez avoir:**
+    
+    1. Le fichier `best_model.pkl` (votre modèle entraîné)
+    2. Le fichier `scaler.pkl` (votre scaler)
+    3. Ces fichiers doivent être dans un dossier `outputs/`
+    
+    **Structure attendue:**
+    ```
+    streamlit_app.py
+    outputs/
+    ├── best_model.pkl
+    └── scaler.pkl
+    ```
+    """)
+    st.stop()
+else:
+    st.success(f"✅ Modèle chargé: {type(model).__name__}")
+
 # =============================================================================
-# SIDEBAR - CONFIGURATION
+# SIDEBAR
 # =============================================================================
 
 st.sidebar.header("⚙️ Configuration")
 
-# Mode de prédiction
-prediction_mode = st.sidebar.radio(
-    "Mode de prédiction",
-    ["🌐 API Azure ML", "💻 Local (hors ligne)"],
-    help="API Azure ML pour le mode production, Local pour les tests"
-)
+st.sidebar.info(f"""
+**📊 Informations sur le Modèle**
 
-# Configuration API
-if prediction_mode == "🌐 API Azure ML":
-    deployment_info = load_deployment_info()
-    
-    if deployment_info:
-        default_uri = deployment_info.get('scoring_uri', '')
-        default_key = deployment_info.get('primary_key', '')
-    else:
-        default_uri = ''
-        default_key = ''
-    
-    scoring_uri = st.sidebar.text_input(
-        "Scoring URI",
-        value=default_uri,
-        help="URL de l'endpoint Azure ML"
-    )
-    
-    api_key = st.sidebar.text_input(
-        "API Key",
-        value=default_key,
-        type="password",
-        help="Clé d'authentification"
-    )
-    
-    if not scoring_uri or not api_key:
-        st.sidebar.warning("⚠️ Veuillez configurer l'URI et la clé API")
+**Type:** {type(model).__name__}  
+**Mode:** Local (sans API)  
+**Status:** ✅ Actif
 
-st.sidebar.markdown("---")
-
-# Informations
-st.sidebar.info("""
-**📊 À propos**
-
-Cette application utilise l'IA pour détecter 
-les transactions frauduleuses en temps réel.
-
-**Modèles:** XGBoost, LightGBM  
-**Précision:** >95%  
-**Déployé sur:** Azure ML
+**Features attendues:** {model.n_features_in_}
 """)
 
 st.sidebar.markdown("---")
@@ -257,15 +220,14 @@ st.sidebar.markdown("**📅 Date:** 2024-2025")
 # TABS PRINCIPALES
 # =============================================================================
 
-tab1, tab2, tab3, tab4 = st.tabs([
-    "🔍 Analyse Transaction Unique",
+tab1, tab2, tab3 = st.tabs([
+    "🔍 Transaction Unique",
     "📊 Analyse Batch (CSV)",
-    "📈 Tableau de Bord",
     "📖 Documentation"
 ])
 
 # =============================================================================
-# TAB 1: ANALYSE TRANSACTION UNIQUE
+# TAB 1: TRANSACTION UNIQUE
 # =============================================================================
 
 with tab1:
@@ -277,18 +239,16 @@ with tab1:
         st.subheader("💰 Informations de Transaction")
         
         amount = st.number_input(
-            "Montant de la transaction (€)",
+            "Montant (€)",
             min_value=0.0,
             max_value=1000000.0,
             value=500.0,
-            step=10.0,
-            help="Montant en euros"
+            step=10.0
         )
         
         transaction_type = st.selectbox(
-            "Type de transaction",
-            ["PAYMENT", "TRANSFER", "CASH_OUT", "DEBIT", "CASH_IN"],
-            help="Nature de la transaction"
+            "Type",
+            ["PAYMENT", "TRANSFER", "CASH_OUT", "DEBIT", "CASH_IN"]
         )
         
         old_balance_orig = st.number_input(
@@ -306,31 +266,25 @@ with tab1:
         )
     
     with col2:
-        st.subheader("👤 Informations Destinataire")
+        st.subheader("👤 Destinataire")
         
         old_balance_dest = st.number_input(
-            "Solde initial destinataire (€)",
+            "Solde initial (€)",
             min_value=0.0,
             value=3000.0,
             step=100.0
         )
         
         new_balance_dest = st.number_input(
-            "Nouveau solde destinataire (€)",
+            "Nouveau solde (€)",
             min_value=0.0,
             value=old_balance_dest + amount,
             step=100.0
         )
         
         hour_of_day = st.slider(
-            "Heure de la transaction",
-            0, 23, 14,
-            help="Heure de la journée (0-23)"
-        )
-        
-        day_of_week = st.selectbox(
-            "Jour de la semaine",
-            ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"]
+            "Heure",
+            0, 23, 14
         )
     
     st.markdown("---")
@@ -341,124 +295,100 @@ with tab1:
         analyze_button = st.button("🔍 ANALYSER LA TRANSACTION", type="primary")
     
     if analyze_button:
-        # Préparer les données
-        # NOTE: Adapter selon vos vraies features!
+        # Adapter selon VOS features réelles!
+        # IMPORTANT: Modifiez cette liste selon les features de votre modèle
         transaction_data = {
             'data': [[
                 amount,
                 old_balance_orig,
                 new_balance_orig,
                 old_balance_dest,
-                new_balance_dest,
-                # Ajoutez d'autres features selon votre modèle
+                new_balance_dest
+                # Ajoutez d'autres features si nécessaire
             ]],
             'transaction_ids': [f'TXN_{datetime.now().strftime("%Y%m%d%H%M%S")}']
         }
         
-        # Faire la prédiction
-        with st.spinner("⏳ Analyse en cours..."):
-            time.sleep(1)  # Simulation
-            
-            if prediction_mode == "🌐 API Azure ML":
-                result, error = predict_fraud_api(transaction_data, scoring_uri, api_key)
-            else:
-                result, error = predict_fraud_local(transaction_data)
+        # Vérifier le nombre de features
+        expected_features = model.n_features_in_
+        actual_features = len(transaction_data['data'][0])
         
-        # Afficher les résultats
-        if error:
-            st.error(f"❌ {error}")
-        elif result and result.get('status') == 'success':
-            pred = result['predictions'][0]
+        if actual_features != expected_features:
+            st.error(f"❌ Erreur: Le modèle attend {expected_features} features, mais vous en fournissez {actual_features}")
+            st.info("""
+            **💡 Solution:**
+            Modifiez la liste `transaction_data['data']` dans le code pour inclure toutes les features nécessaires.
+            """)
+        else:
+            with st.spinner("⏳ Analyse en cours..."):
+                result, error = predict_fraud_local(transaction_data)
             
-            st.success("✅ Analyse terminée!")
-            
-            # Affichage principal
-            st.markdown("## 🎯 Résultat de l'Analyse")
-            
-            # Alerte
-            if pred['is_fraud']:
-                st.markdown(
-                    f'<div class="alert-fraud">🚨 ALERTE FRAUDE DÉTECTÉE</div>',
-                    unsafe_allow_html=True
-                )
-            else:
-                st.markdown(
-                    f'<div class="alert-safe">✅ TRANSACTION LÉGITIME</div>',
-                    unsafe_allow_html=True
-                )
-            
-            # Métriques
-            col_m1, col_m2, col_m3, col_m4 = st.columns(4)
-            
-            with col_m1:
-                st.metric(
-                    "Transaction ID",
-                    pred['transaction_id']
-                )
-            
-            with col_m2:
-                st.metric(
-                    "Risque",
-                    pred['risk_level'],
-                    delta="ÉLEVÉ" if pred['risk_level'] == "HIGH" else None
-                )
-            
-            with col_m3:
-                st.metric(
-                    "Probabilité Fraude",
-                    f"{pred['fraud_probability']*100:.1f}%"
-                )
-            
-            with col_m4:
-                st.metric(
-                    "Confiance",
-                    f"{pred['confidence']*100:.1f}%"
-                )
-            
-            # Jauge de probabilité
-            st.markdown("### 📊 Niveau de Risque")
-            col_gauge1, col_gauge2 = st.columns(2)
-            
-            with col_gauge1:
-                fig_fraud = create_gauge_chart(
-                    pred['fraud_probability'],
-                    "Probabilité de Fraude"
-                )
-                st.plotly_chart(fig_fraud, use_container_width=True)
-            
-            with col_gauge2:
-                # Recommandation
-                st.markdown("### 💡 Recommandation")
+            if error:
+                st.error(f"❌ {error}")
+            elif result and result.get('status') == 'success':
+                pred = result['predictions'][0]
                 
-                if pred['fraud_probability'] >= 0.7:
-                    st.error("""
-                    **🚫 BLOQUER LA TRANSACTION**
-                    
-                    - Fraude hautement probable
-                    - Investigation immédiate requise
-                    - Contacter le client
-                    - Vérifier l'identité
-                    """)
-                elif pred['fraud_probability'] >= 0.4:
-                    st.warning("""
-                    **⚠️ DEMANDER VÉRIFICATION**
-                    
-                    - Risque modéré détecté
-                    - Authentification additionnelle recommandée
-                    - Surveillance renforcée
-                    """)
+                st.success("✅ Analyse terminée!")
+                st.markdown("## 🎯 Résultat")
+                
+                # Alerte
+                if pred['is_fraud']:
+                    st.markdown(
+                        '<div class="alert-fraud">🚨 FRAUDE DÉTECTÉE</div>',
+                        unsafe_allow_html=True
+                    )
                 else:
-                    st.success("""
-                    **✅ APPROUVER LA TRANSACTION**
+                    st.markdown(
+                        '<div class="alert-safe">✅ TRANSACTION LÉGITIME</div>',
+                        unsafe_allow_html=True
+                    )
+                
+                # Métriques
+                col_m1, col_m2, col_m3, col_m4 = st.columns(4)
+                
+                with col_m1:
+                    st.metric("ID", pred['transaction_id'])
+                
+                with col_m2:
+                    st.metric("Risque", pred['risk_level'])
+                
+                with col_m3:
+                    st.metric("Prob. Fraude", f"{pred['fraud_probability']*100:.1f}%")
+                
+                with col_m4:
+                    st.metric("Confiance", f"{pred['confidence']*100:.1f}%")
+                
+                # Jauge
+                st.markdown("### 📊 Niveau de Risque")
+                col_gauge1, col_gauge2 = st.columns(2)
+                
+                with col_gauge1:
+                    fig_fraud = create_gauge_chart(
+                        pred['fraud_probability'],
+                        "Probabilité de Fraude"
+                    )
+                    st.plotly_chart(fig_fraud, use_container_width=True)
+                
+                with col_gauge2:
+                    st.markdown("### 💡 Recommandation")
                     
-                    - Aucun risque détecté
-                    - Transaction peut être traitée
-                    - Surveillance standard
-                    """)
-            
-            # Détails techniques
-            with st.expander("🔬 Détails Techniques"):
-                st.json(pred)
+                    if pred['fraud_probability'] >= 0.7:
+                        st.error("""
+                        **🚫 BLOQUER**
+                        - Fraude hautement probable
+                        - Investigation requise
+                        """)
+                    elif pred['fraud_probability'] >= 0.4:
+                        st.warning("""
+                        **⚠️ VÉRIFIER**
+                        - Risque modéré
+                        - Authentification additionnelle
+                        """)
+                    else:
+                        st.success("""
+                        **✅ APPROUVER**
+                        - Aucun risque détecté
+                        """)
 
 # =============================================================================
 # TAB 2: ANALYSE BATCH
@@ -466,93 +396,68 @@ with tab1:
 
 with tab2:
     st.header("Analyse de Fichier CSV")
-    st.markdown("Uploadez un fichier CSV contenant plusieurs transactions pour une analyse groupée.")
     
-    # Upload
     uploaded_file = st.file_uploader(
         "📁 Choisir un fichier CSV",
-        type=['csv'],
-        help="Format: colonnes avec les features de vos transactions"
+        type=['csv']
     )
     
     if uploaded_file is not None:
-        # Charger le fichier
         df = pd.read_csv(uploaded_file)
         
         st.success(f"✅ Fichier chargé: {len(df)} transactions")
         
-        # Aperçu
-        with st.expander("👁️ Aperçu des données"):
+        with st.expander("👁️ Aperçu"):
             st.dataframe(df.head(10))
         
-        # Bouton d'analyse
-        if st.button("🚀 ANALYSER TOUTES LES TRANSACTIONS", type="primary"):
+        if st.button("🚀 ANALYSER", type="primary"):
             
-            # Préparer les données
-            # NOTE: Adapter selon vos colonnes!
-            try:
-                # Exemple: supposons que df contient déjà les bonnes colonnes
+            # Vérifier que le CSV a le bon nombre de colonnes
+            expected_features = model.n_features_in_
+            actual_features = df.shape[1]
+            
+            if actual_features != expected_features:
+                st.error(f"❌ Le CSV doit avoir {expected_features} colonnes (actuellement: {actual_features})")
+            else:
                 data_to_predict = {
                     'data': df.values.tolist(),
                     'transaction_ids': [f'TXN_{i:05d}' for i in range(len(df))]
                 }
                 
-                # Faire la prédiction
                 with st.spinner(f"⏳ Analyse de {len(df)} transactions..."):
-                    if prediction_mode == "🌐 API Azure ML":
-                        result, error = predict_fraud_api(data_to_predict, scoring_uri, api_key)
-                    else:
-                        result, error = predict_fraud_local(data_to_predict)
+                    result, error = predict_fraud_local(data_to_predict)
                 
                 if error:
                     st.error(f"❌ {error}")
-                elif result and result.get('status') == 'success':
+                elif result:
                     predictions = result['predictions']
-                    
-                    # Créer DataFrame des résultats
                     results_df = pd.DataFrame(predictions)
                     df_combined = pd.concat([df, results_df], axis=1)
                     
-                    # Statistiques
-                    st.markdown("## 📊 Résultats de l'Analyse")
+                    st.markdown("## 📊 Résultats")
                     
-                    col_s1, col_s2, col_s3, col_s4 = st.columns(4)
+                    col_s1, col_s2, col_s3 = st.columns(3)
                     
                     with col_s1:
-                        st.metric("Total Transactions", len(df_combined))
+                        st.metric("Total", len(df_combined))
                     
                     with col_s2:
                         fraud_count = results_df['is_fraud'].sum()
-                        st.metric(
-                            "Fraudes Détectées",
-                            fraud_count,
-                            delta=f"{fraud_count/len(df)*100:.1f}%",
-                            delta_color="inverse"
-                        )
+                        st.metric("Fraudes", fraud_count, f"{fraud_count/len(df)*100:.1f}%")
                     
                     with col_s3:
                         avg_prob = results_df['fraud_probability'].mean()
-                        st.metric(
-                            "Prob. Moyenne",
-                            f"{avg_prob*100:.1f}%"
-                        )
+                        st.metric("Prob. Moyenne", f"{avg_prob*100:.1f}%")
                     
-                    with col_s4:
-                        high_risk = (results_df['risk_level'] == 'HIGH').sum()
-                        st.metric("Risque Élevé", high_risk)
-                    
-                    # Distribution
-                    st.markdown("### 📈 Distribution des Risques")
-                    
+                    # Charts
                     col_chart1, col_chart2 = st.columns(2)
                     
                     with col_chart1:
-                        # Pie chart
                         risk_counts = results_df['risk_level'].value_counts()
                         fig_pie = px.pie(
                             values=risk_counts.values,
                             names=risk_counts.index,
-                            title="Répartition par Niveau de Risque",
+                            title="Répartition des Risques",
                             color_discrete_map={
                                 'LOW': '#27ae60',
                                 'MEDIUM': '#f39c12',
@@ -562,127 +467,70 @@ with tab2:
                         st.plotly_chart(fig_pie, use_container_width=True)
                     
                     with col_chart2:
-                        # Histogram
                         fig_hist = px.histogram(
                             results_df,
                             x='fraud_probability',
                             nbins=50,
-                            title="Distribution des Probabilités de Fraude",
-                            labels={'fraud_probability': 'Probabilité'}
+                            title="Distribution des Probabilités"
                         )
                         st.plotly_chart(fig_hist, use_container_width=True)
                     
-                    # Table des transactions suspectes
-                    st.markdown("### 🚨 Transactions Suspectes (Top 20)")
+                    # Top 20
+                    st.markdown("### 🚨 Top 20 Transactions Suspectes")
                     suspicious = df_combined.sort_values('fraud_probability', ascending=False).head(20)
-                    st.dataframe(
-                        suspicious[['transaction_id', 'is_fraud', 'fraud_probability', 'risk_level']],
-                        use_container_width=True
-                    )
+                    st.dataframe(suspicious, use_container_width=True)
                     
-                    # Télécharger les résultats
+                    # Download
                     csv = df_combined.to_csv(index=False)
                     st.download_button(
-                        label="📥 Télécharger les Résultats (CSV)",
+                        "📥 Télécharger les Résultats",
                         data=csv,
                         file_name=f"fraud_analysis_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
                         mime="text/csv"
                     )
-                    
-            except Exception as e:
-                st.error(f"❌ Erreur lors de l'analyse: {str(e)}")
 
 # =============================================================================
-# TAB 3: TABLEAU DE BORD
+# TAB 3: DOCUMENTATION
 # =============================================================================
 
 with tab3:
-    st.header("📈 Tableau de Bord en Temps Réel")
-    st.info("🚧 Fonctionnalité à venir: Monitoring en temps réel des transactions")
-    
-    # Placeholder pour stats temps réel
-    col_dash1, col_dash2, col_dash3 = st.columns(3)
-    
-    with col_dash1:
-        st.metric("Transactions Aujourd'hui", "1,234", "+15%")
-    
-    with col_dash2:
-        st.metric("Fraudes Bloquées", "23", "-8%")
-    
-    with col_dash3:
-        st.metric("Taux de Détection", "96.5%", "+2.1%")
-    
-    st.markdown("---")
-    st.markdown("**💡 Tip:** Connectez Azure Stream Analytics pour le monitoring en temps réel")
-
-# =============================================================================
-# TAB 4: DOCUMENTATION
-# =============================================================================
-
-with tab4:
     st.header("📖 Documentation")
     
     st.markdown("""
-    ## 🎯 À Propos du Système
+    ## 🎯 À Propos
     
-    Ce système de détection de fraude utilise des algorithmes de Machine Learning 
-    avancés pour identifier les transactions suspectes en temps réel.
+    Application de détection de fraude utilisant du Machine Learning en mode local.
     
-    ### 🤖 Modèles Utilisés
+    ### 🤖 Modèle
     
-    - **XGBoost**: Gradient Boosting optimisé
-    - **LightGBM**: Algorithme rapide et efficace
-    - **Random Forest**: Ensemble d'arbres de décision
-    - **Logistic Regression**: Baseline linéaire
+    - **Type:** XGBoost / LightGBM / Random Forest
+    - **Mode:** Local (pas d'API cloud)
+    - **Déploiement:** Streamlit
     
-    ### 📊 Métriques de Performance
+    ### 📊 Performance
     
     | Métrique | Score |
     |----------|-------|
-    | Accuracy | 95.2% |
-    | Precision | 93.8% |
-    | Recall | 96.5% |
-    | F1-Score | 95.1% |
-    | ROC-AUC | 0.982 |
+    | Accuracy | ~95% |
+    | Precision | ~94% |
+    | Recall | ~96% |
+    | F1-Score | ~95% |
     
-    ### 🔍 Comment ça marche?
+    ### 🔧 Utilisation
     
-    1. **Collecte des données**: Les informations de transaction sont collectées
-    2. **Preprocessing**: Normalisation et transformation des features
-    3. **Prédiction**: Le modèle analyse les patterns suspects
-    4. **Scoring**: Une probabilité de fraude est calculée
-    5. **Action**: Recommandation basée sur le niveau de risque
-    
-    ### ⚙️ Configuration Technique
-    
-    - **Cloud**: Microsoft Azure
-    - **ML Framework**: Scikit-learn, XGBoost, LightGBM
-    - **API**: Azure ML Endpoint (REST)
-    - **Frontend**: Streamlit
-    - **Déploiement**: Azure Container Instance
+    1. **Transaction unique:** Entrez les informations manuellement
+    2. **Batch:** Uploadez un fichier CSV avec les bonnes colonnes
+    3. **Résultats:** Visualisez et téléchargez les analyses
     
     ### 📞 Support
     
-    Pour toute question ou problème:
-    - 📧 Email: support@fraud-detection.com
-    - 💬 Teams: Channel Data Science
-    - 📱 Téléphone: +33 1 23 45 67 89
-    
-    ### 📚 Ressources
-    
-    - [Documentation Azure ML](https://docs.microsoft.com/azure/machine-learning)
-    - [Guide API](./api_usage_example.txt)
-    - [Code Source GitHub](https://github.com/votre-repo)
+    - 📧 Email: votre.email@example.com
+    - 💬 GitHub: github.com/votre-repo
     """)
-
-# =============================================================================
-# FOOTER
-# =============================================================================
 
 st.markdown("---")
 st.markdown("""
 <div style='text-align: center; color: #7f8c8d;'>
-    <p>🔐 Système Sécurisé | 📊 Azure ML | 🎓 Projet CDDA 2024-2025</p>
-    <p>Développé avec ❤️ par [Votre Nom]</p>
+    <p>🎓 Projet CDDA 2024-2025 | Mode Local</p>
 </div>
 """, unsafe_allow_html=True)
