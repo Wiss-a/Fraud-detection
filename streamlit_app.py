@@ -423,10 +423,7 @@ with tab1:
             # ratio_amount_orig       # ratio montant / solde émetteur
         ]])
 
-        # Détection de fraude “évidente”
-        if delta_orig != amount or ratio_amount_orig > 10 or transaction_type == 'CASH_OUT' and amount > 10000:
-            st.error("🚨 FRAUDE ÉVIDENTE DÉTECTÉE par règles métiers")
-            final_decision = 1
+    
 
         # Afficher les features BRUTES
         col1, col2 = st.columns(2)
@@ -654,7 +651,7 @@ with tab1:
             # Utiliser seuil 0.5
             if delta_orig != amount or ratio_amount_orig > 10 or transaction_type == 'CASH_OUT' and amount > 10000:
                 st.error("🚨 FRAUDE ÉVIDENTE DÉTECTÉE par règles métiers")
-                final_decision = 1 if fraud_prob >= 0.5 else 0
+                final_decision = 1
             
             if final_decision == 1:
                 st.markdown(
