@@ -191,6 +191,19 @@ if metadata:
 st.sidebar.markdown("---")
 # À ajouter dans la SIDEBAR (après les métriques du modèle)
 
+
+# Initialiser session state pour le mode démo
+if 'demo_type' not in st.session_state:
+    st.session_state.demo_type = None
+
+# Mode de démonstration
+demo_mode = st.sidebar.checkbox(
+    "🎮 Mode Démonstration",
+    help="Remplit automatiquement avec des exemples"
+)
+
+st.sidebar.markdown("---")
+
 # =============================================================================
 # TABS PRINCIPALES
 # =============================================================================
