@@ -547,10 +547,15 @@ with tab1:
         with st.expander("🔬 Debug: Voir les features calculées"):
             st.write("**Features envoyées au modèle:**")
             feature_labels = [
-                "Montant", "Solde init. émetteur", "Nouveau solde émetteur",
-                "Solde init. dest.", "Nouveau solde dest.", "Change émetteur",
-                "Change dest.", "Type encodé", "Heure normalisée", "Jour encodé"
+                'step',
+                'type',
+                'amount',
+                'oldbalanceOrg',
+                'newbalanceOrig',
+                'oldbalanceDest',
+                'newbalanceDest'
             ]
+
             df_features = pd.DataFrame([features[0]], columns=feature_labels)
             st.dataframe(df_features)
             assert features.shape[1] == scaler.n_features_in_
