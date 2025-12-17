@@ -345,7 +345,9 @@ pour détecter les fraudes bancaires.
 - Azure ML (training)
 """)
 
-
+st.sidebar.markdown("---")
+st.sidebar.markdown("**👨‍💻 Développé par:** [Votre Nom]")
+st.sidebar.markdown("**🎓 Projet CDDA** 2024-2025")
 
 # =============================================================================
 # TABS PRINCIPALES
@@ -372,15 +374,15 @@ with tab1:
         col_demo1, col_demo2, col_demo3 = st.columns(3)
         
         with col_demo1:
-            if st.button("✅ Transaction Légitime", width='stretch'):
+            if st.button("✅ Transaction Légitime", use_container_width=True):
                 st.session_state.demo = "legitimate"
         
         with col_demo2:
-            if st.button("⚠️ Transaction Suspecte", width='stretch'):
+            if st.button("⚠️ Transaction Suspecte", use_container_width=True):
                 st.session_state.demo = "suspicious"
         
         with col_demo3:
-            if st.button("🚨 Fraude Évidente", width='stretch'):
+            if st.button("🚨 Fraude Évidente", use_container_width=True):
                 st.session_state.demo = "fraud"
     
     st.markdown("---")
@@ -510,7 +512,7 @@ with tab1:
         analyze_button = st.button(
             "🔍 ANALYSER LA TRANSACTION",
             type="primary",
-            width='stretch'
+            use_container_width=True
         )
     
     if analyze_button:
@@ -643,12 +645,12 @@ with tab1:
                     "Probabilité de Fraude",
                     result['color']
                 )
-                st.plotly_chart(fig_gauge,width='stretch')
+                st.plotly_chart(fig_gauge, use_container_width=True)
             
             with col_viz2:
                 # Distribution
                 fig_dist = create_probability_distribution(result['fraud_probability'])
-                st.plotly_chart(fig_dist, width='stretch')
+                st.plotly_chart(fig_dist, use_container_width=True)
             
             st.markdown("---")
             
@@ -814,10 +816,10 @@ with tab2:
             
             # Aperçu
             with st.expander("👁️ Aperçu des données (10 premières lignes)"):
-                st.dataframe(df.head(10), width='stretch')
+                st.dataframe(df.head(10), use_container_width=True)
             
             # Bouton d'analyse
-            if st.button("🚀 ANALYSER TOUTES LES TRANSACTIONS", type="primary", width='stretch'):
+            if st.button("🚀 ANALYSER TOUTES LES TRANSACTIONS", type="primary", use_container_width=True):
                 
                 progress_bar = st.progress(0)
                 status_text = st.empty()
@@ -905,7 +907,7 @@ with tab2:
                         hole=0.4
                     )
                     fig_pie.update_traces(textinfo='percent+label', textfont_size=14)
-                    st.plotly_chart(fig_pie, width='stretch')
+                    st.plotly_chart(fig_pie, use_container_width=True)
 
                 with col_chart2:
                     # Histogramme des probabilités
@@ -920,7 +922,7 @@ with tab2:
                         xaxis_title="Probabilité de Fraude",
                         yaxis_title="Nombre de Transactions"
                     )
-                    st.plotly_chart(fig_hist, width='stretch')
+                    st.plotly_chart(fig_hist, use_container_width=True)
                 
                 # Top transactions suspectes
                 st.markdown("### 🚨 Top 20 Transactions Suspectes")
@@ -943,7 +945,7 @@ with tab2:
                     'Fraud_Probability': '{:.1%}'
                 })
 
-                st.dataframe(styled_df, width='stretch')
+                st.dataframe(styled_df, use_container_width=True)
 
                 # Tableau complet
                 with st.expander("📋 Voir Toutes les Transactions"):
@@ -952,7 +954,7 @@ with tab2:
                             'Montant': '{:.2f} €',
                             'Fraud_Probability': '{:.1%}'
                         }),
-                        width='stretch'
+                        use_container_width=True
                     )
                 
                 # Télécharger les résultats
@@ -963,7 +965,7 @@ with tab2:
                     data=csv,
                     file_name=f"fraud_analysis_results_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
                     mime="text/csv",
-                    width='stretch'
+                    use_container_width=True
                 )
                 
         except Exception as e:
@@ -1026,7 +1028,7 @@ if metadata and 'all_models' in metadata:
             'ROC-AUC': '{:.3f}'
         })
         
-        st.dataframe(styled_comp, width='stretch')
+        st.dataframe(styled_comp, use_container_width=True)
         
         # Graphiques comparatifs
         st.markdown("---")
@@ -1045,7 +1047,7 @@ if metadata and 'all_models' in metadata:
                 color_discrete_sequence=['#3498db', '#e74c3c', '#2ecc71', '#f39c12']
             )
             fig_bar.update_layout(yaxis_title="Score", xaxis_title="")
-            st.plotly_chart(fig_bar, width='stretch')
+            st.plotly_chart(fig_bar, use_container_width=True)
         
         with col_viz2:
             # Radar chart du meilleur modèle
@@ -1072,67 +1074,67 @@ if metadata and 'all_models' in metadata:
                 showlegend=True,
                 title=f"Profil du Modèle {best_model_name}"
             )
-            st.plotly_chart(fig_radar, width='stretch')
+            st.plotly_chart(fig_radar, use_container_width=True)
 
 else:
     st.info("📊 Statistiques détaillées non disponibles. Exécutez d'abord l'entraînement des modèles.")
 
-# # Informations sur le déploiement
-# st.markdown("---")
-# st.markdown("## ⚙️ Configuration Technique")
+# Informations sur le déploiement
+st.markdown("---")
+st.markdown("## ⚙️ Configuration Technique")
 
-# col_tech1, col_tech2, col_tech3 = st.columns(3)
+col_tech1, col_tech2, col_tech3 = st.columns(3)
 
-# with col_tech1:
-#     st.markdown("""
-#     **🔧 Framework**
-#     - Scikit-learn
-#     - XGBoost
-#     - LightGBM
-#     - Pandas / NumPy
-#     """)
+with col_tech1:
+    st.markdown("""
+    **🔧 Framework**
+    - Scikit-learn
+    - XGBoost
+    - LightGBM
+    - Pandas / NumPy
+    """)
 
-# with col_tech2:
-#     st.markdown("""
-#     **☁️ Infrastructure**
-#     - Azure ML (Training)
-#     - Mode Local (Inference)
-#     - Streamlit (UI)
-#     - Python 3.8+
-#     """)
+with col_tech2:
+    st.markdown("""
+    **☁️ Infrastructure**
+    - Azure ML (Training)
+    - Mode Local (Inference)
+    - Streamlit (UI)
+    - Python 3.8+
+    """)
 
-# with col_tech3:
-#     st.markdown("""
-#     **📊 Performance**
-#     - Temps: <100ms
-#     - Précision: >95%
-#     - Scalable: Oui
-#     - Real-time: Oui
-#     """)
-# st.markdown("""
-# ## 🎯 À Propos du Système
+with col_tech3:
+    st.markdown("""
+    **📊 Performance**
+    - Temps: <100ms
+    - Précision: >95%
+    - Scalable: Oui
+    - Real-time: Oui
+    """)
+st.markdown("""
+## 🎯 À Propos du Système
 
-# Ce système de détection de fraude bancaire utilise des algorithmes de Machine Learning
-# de pointe pour identifier les transactions suspectes en temps réel.
+Ce système de détection de fraude bancaire utilise des algorithmes de Machine Learning
+de pointe pour identifier les transactions suspectes en temps réel.
 
-# ### 🤖 Modèles Utilisés
+### 🤖 Modèles Utilisés
 
-# Le système compare plusieurs algorithmes pour sélectionner le plus performant:
+Le système compare plusieurs algorithmes pour sélectionner le plus performant:
 
-# | Modèle | Description | Performance |
-# |--------|-------------|-------------|
-# | **XGBoost** | Gradient Boosting optimisé | F1: ~95% |
-# | **LightGBM** | Gradient Boosting rapide | F1: ~94% |
-# | **Random Forest** | Ensemble d'arbres | F1: ~93% |
-# | **Logistic Regression** | Baseline linéaire | F1: ~88% |
+| Modèle | Description | Performance |
+|--------|-------------|-------------|
+| **XGBoost** | Gradient Boosting optimisé | F1: ~95% |
+| **LightGBM** | Gradient Boosting rapide | F1: ~94% |
+| **Random Forest** | Ensemble d'arbres | F1: ~93% |
+| **Logistic Regression** | Baseline linéaire | F1: ~88% |
 
-# *Dernière mise à jour: {datetime.now().strftime('%d/%m/%Y %H:%M')}*
-# """)
-# st.markdown("---")
-# st.markdown("""
-# <div style='text-align: center; color: #7f8c8d; padding: 2rem 0;'>
-#     <p style='font-size: 1.1rem;'>🔐 <b>Système Sécurisé</b> | 📊 <b>Azure ML Training</b> | 💻 <b>Mode Local</b></p>
-#     <p style='font-size: 0.9rem;'>Développé avec ❤️ pour le Projet CDDA 2024-2025</p>
-#     <p style='font-size: 0.8rem; color: #95a5a6;'>© 2024 - Tous droits réservés</p>
-# </div>
-# """, unsafe_allow_html=True)
+*Dernière mise à jour: {datetime.now().strftime('%d/%m/%Y %H:%M')}*
+""")
+st.markdown("---")
+st.markdown("""
+<div style='text-align: center; color: #7f8c8d; padding: 2rem 0;'>
+    <p style='font-size: 1.1rem;'>🔐 <b>Système Sécurisé</b> | 📊 <b>Azure ML Training</b> | 💻 <b>Mode Local</b></p>
+    <p style='font-size: 0.9rem;'>Développé avec ❤️ pour le Projet CDDA 2024-2025</p>
+    <p style='font-size: 0.8rem; color: #95a5a6;'>© 2024 - Tous droits réservés</p>
+</div>
+""", unsafe_allow_html=True)
