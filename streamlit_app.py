@@ -554,7 +554,7 @@ with tab1:
             st.write("**Après scaling (RobustScaler):**")
             scaled = scaler.transform(features)
             df_scaled = pd.DataFrame([scaled[0]], columns=feature_labels)
-            st.dataframe(df_scaled.style.background_gradient(cmap='RdYlGn_r', axis=1))
+            st.dataframe(df_scaled)
             
             # Statistiques
             st.write("**Statistiques:**")
