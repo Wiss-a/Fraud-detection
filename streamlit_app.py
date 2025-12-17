@@ -1,6 +1,5 @@
-"""
-================================================================================
-APPLICATION STREAMLIT - DÉTECTION DE FRAUDE (VERSION CORRIGÉE)
+"""================================================================================
+APPLICATION STREAMLIT - DÉTECTION DE FRAUDE (VERSION CORRIGÉE AVEC RÈGLES MÉTIER)
 Mode 100% LOCAL - Sans Azure ML Endpoint
 ================================================================================
 """
@@ -18,7 +17,6 @@ import os
 # =============================================================================
 # CONFIGURATION DE LA PAGE
 # =============================================================================
-
 st.set_page_config(
     page_title="🔍 Détection de Fraude Bancaire",
     page_icon="🔍",
@@ -26,236 +24,128 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# CSS Personnalisé (identique)
-st.markdown("""
-<style>
-    .main-header {
-        font-size: 3rem;
-        font-weight: bold;
-        background: linear-gradient(90deg, #e74c3c, #3498db);
-        -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
-        text-align: center;
-        padding: 1rem 0;
-    }
-    .sub-header {
-        text-align: center;
-        color: #7f8c8d;
-        font-size: 1.2rem;
-        margin-bottom: 2rem;
-    }
-    .alert-fraud {
-        background: linear-gradient(135deg, #fee 0%, #fcc 100%);
-        padding: 1.5rem;
-        border-radius: 15px;
-        border-left: 5px solid #e74c3c;
-        color: #c0392b;
-        font-weight: bold;
-        font-size: 1.3rem;
-        text-align: center;
-        margin: 1rem 0;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    }
-    .alert-safe {
-        background: linear-gradient(135deg, #efe 0%, #cfc 100%);
-        padding: 1.5rem;
-        border-radius: 15px;
-        border-left: 5px solid #27ae60;
-        color: #229954;
-        font-weight: bold;
-        font-size: 1.3rem;
-        text-align: center;
-        margin: 1rem 0;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    }
-    .alert-warning {
-        background: linear-gradient(135deg, #fff3cd 0%, #ffe69c 100%);
-        padding: 1.5rem;
-        border-radius: 15px;
-        border-left: 5px solid #f39c12;
-        color: #856404;
-        font-weight: bold;
-        font-size: 1.3rem;
-        text-align: center;
-        margin: 1rem 0;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.1);
-    }
-    .stButton>button {
-        width: 100%;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        font-weight: bold;
-        border-radius: 10px;
-        padding: 0.75rem;
-        border: none;
-        font-size: 1.2rem;
-        transition: all 0.3s;
-    }
-    .stButton>button:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
-    }
-</style>
-""", unsafe_allow_html=True)
-
 # =============================================================================
 # CHARGEMENT DES MODÈLES
 # =============================================================================
-
 @st.cache_resource
 def load_models():
-    """Charge le modèle, le scaler et les métadonnées"""
     try:
         model = joblib.load('outputs/best_model.pkl')
         scaler = joblib.load('outputs/scaler.pkl')
-        
         try:
             with open('outputs/metadata.json', 'r') as f:
                 metadata = json.load(f)
         except:
-            metadata = {
-                'best_model': 'XGBoost',
-                'optimal_threshold': 0.5,  # Fallback si pas dans metadata
-                'all_models': {}
-            }
-        
-        # Extraire le seuil optimal
-        optimal_threshold = metadata.get('optimal_threshold', 0.5)
-        
-        return model, scaler, metadata, optimal_threshold, None
-        
+            metadata = {'best_model':'XGBoost','optimal_threshold':0.5,'all_models':{}}
+        return model, scaler, metadata, metadata.get('optimal_threshold',0.5), None
     except Exception as e:
         return None, None, None, None, str(e)
 
 model, scaler, metadata, optimal_threshold, error = load_models()
+if error:
+    st.error(f"❌ Erreur de chargement des modèles: {error}")
+    st.stop()
 
 # =============================================================================
 # FONCTIONS UTILITAIRES
 # =============================================================================
+def predict_fraud(features, threshold=0.5):
+    # Prédit la fraude avec seuil adaptatif et règles métier
+    scaled = scaler.transform(features)
+    probs = model.predict_proba(scaled)[0]
+    fraud_prob = float(probs[1])
+    legit_prob = float(probs[0])
 
-def predict_fraud(input_data, threshold=None):
-    """
-    Fait une prédiction de fraude
-    
-    Args:
-        input_data: array numpy des features
-        threshold: seuil de décision (si None, utilise un seuil adapté)
-    """
-    try:
-        if len(input_data.shape) == 1:
-            input_data = input_data.reshape(1, -1)
-        
-        # ⚠️ CORRECTION: Utiliser un seuil plus raisonnable
-        # Le seuil de 0.77 du training est trop élevé pour la production
-        if threshold is None:
-            # Utiliser 0.5 au lieu de optimal_threshold (0.77)
-            # OU ajuster selon vos besoins métier
-            threshold = 0.5  # Seuil standard plus équilibré
-        
-        # Scaling
-        scaled_data = scaler.transform(input_data)
-        
-        # Prédiction
-        probabilities = model.predict_proba(scaled_data)[0]
-        fraud_prob = float(probabilities[1])
-        
-        # Appliquer le seuil
-        prediction = 1 if fraud_prob >= threshold else 0
-        
-        
+    # Features dérivées pour règle métier
+    delta_orig = features[0][3] - features[0][4]
+    delta_dest = features[0][6] - features[0][5]
+    ratio_amount_orig = features[0][2] / (features[0][3] + 1e-5)
 
-        if fraud_prob >= 0.70:
-            risk_level = "HIGH"
-            recommendation = "🚫 BLOQUER - Fraude hautement probable"
-            color = "red"
-        elif fraud_prob >= 0.40:
-            risk_level = "MEDIUM"
-            recommendation = "⚠️ VÉRIFIER - Investigation recommandée"
-            color = "orange"
-        else:
-            risk_level = "LOW"
-            recommendation = "✅ APPROUVER - Transaction sûre"
-            color = "green"
-        
-        return {
-            'is_fraud': bool(prediction == 1),
-            'fraud_probability': fraud_prob,
-            'legitimate_probability': float(probabilities[0]),
-            'confidence': float(max(probabilities)),
-            'risk_level': risk_level,
-            'recommendation': recommendation,
-            'color': color,
-            'threshold_used': threshold,
-            'model_optimal_threshold': optimal_threshold  # Pour debug
-        }
-        
-    except Exception as e:
-        st.error(f"Erreur lors de la prédiction: {str(e)}")
-        return None
-    
+    # Règle métier “fraude évidente”
+    if delta_orig != features[0][2] or ratio_amount_orig > 10 or (features[0][1]==3 and features[0][2]>10000):
+        st.error("🚨 FRAUDE ÉVIDENTE DÉTECTÉE par règles métiers")
+        final_decision = 1
+    else:
+        # Score combiné ML + ratio pour transactions à risque
+        risk_score = fraud_prob + 0.5 * min(ratio_amount_orig/10,1.0)
+        final_decision = 1 if risk_score >= threshold else 0
+
+    # Niveau de risque et recommandation
+    if final_decision==1:
+        risk_level = "HIGH"
+        recommendation = "🚫 BLOQUER - Fraude hautement probable"
+        color="red"
+    elif fraud_prob >= 0.4 or ratio_amount_orig > 1.5:
+        risk_level = "MEDIUM"
+        recommendation = "⚠️ VÉRIFIER - Investigation recommandée"
+        color="orange"
+    else:
+        risk_level = "LOW"
+        recommendation = "✅ APPROUVER - Transaction sûre"
+        color="green"
+
+    return {
+        'is_fraud': bool(final_decision),
+        'fraud_probability': fraud_prob,
+        'legitimate_probability': legit_prob,
+        'confidence': float(max(probs)),
+        'risk_level': risk_level,
+        'recommendation': recommendation,
+        'color': color,
+        'ratio_amount_orig': ratio_amount_orig
+    }
+
 def create_gauge_chart(value, title, color_gradient):
-    """Crée une jauge interactive"""
     fig = go.Figure(go.Indicator(
         mode="gauge+number",
-        value=value * 100,
-        domain={'x': [0, 1], 'y': [0, 1]},
-        title={'text': title, 'font': {'size': 24, 'color': '#2c3e50'}},
-        number={'suffix': "%", 'font': {'size': 40}},
-        gauge={
-            'axis': {'range': [None, 100], 'tickwidth': 2, 'tickcolor': "darkgray"},
-            'bar': {'color': color_gradient},
-            'bgcolor': "white",
-            'borderwidth': 2,
-            'bordercolor': "gray",
-            'steps': [
-                {'range': [0, 40], 'color': '#d5f4e6'},
-                {'range': [40, 70], 'color': '#fff3cd'},
-                {'range': [70, 100], 'color': '#f8d7da'}
-            ],
-            'threshold': {
-                'line': {'color': "red", 'width': 4},
-                'thickness': 0.75,
-                'value': 70
-            }
-        }
+        value=value*100,
+        domain={'x':[0,1],'y':[0,1]},
+        title={'text':title,'font':{'size':24,'color':'#2c3e50'}},
+        number={'suffix':"%",'font':{'size':40}},
+        gauge={'axis':{'range':[None,100]},
+               'bar':{'color':color_gradient}}
     ))
-    
-    fig.update_layout(
-        height=300,
-        margin=dict(l=20, r=20, t=80, b=20),
-        paper_bgcolor="rgba(0,0,0,0)",
-        font={'family': "Arial"}
-    )
+    fig.update_layout(height=300, margin=dict(l=20,r=20,t=80,b=20), paper_bgcolor="rgba(0,0,0,0)")
     return fig
 
-def create_probability_distribution(fraud_prob):
-    """Crée un graphique de distribution des probabilités"""
-    fig = go.Figure()
-    
-    categories = ['Légitime', 'Fraude']
-    values = [1 - fraud_prob, fraud_prob]
-    colors = ['#27ae60', '#e74c3c']
-    
-    fig.add_trace(go.Bar(
-        x=categories,
-        y=[v * 100 for v in values],
-        marker_color=colors,
-        text=[f'{v*100:.1f}%' for v in values],
-        textposition='outside',
-        textfont=dict(size=16, color='white')
-    ))
-    
-    fig.update_layout(
-        title="Distribution des Probabilités",
-        yaxis_title="Probabilité (%)",
-        height=300,
-        showlegend=False,
-        paper_bgcolor="rgba(0,0,0,0)",
-        plot_bgcolor="rgba(0,0,0,0)",
-        font=dict(size=14)
-    )
-    
-    return fig
+# =============================================================================
+# INTERFACE STREAMLIT
+# =============================================================================
+st.title("🔍 Détection de Fraude Bancaire - Version Corrigée")
+
+st.sidebar.header("⚙️ Configuration")
+threshold = st.sidebar.slider("Seuil décision (ML + règles métier)", 0.1, 0.9, 0.5, 0.05)
+
+# Formulaire transaction
+amount = st.number_input("Montant (€)", value=50000.0)
+old_orig = st.number_input("Solde initial émetteur (€)", value=100.0)
+new_orig = st.number_input("Nouveau solde émetteur (€)", value=0.0)
+old_dest = st.number_input("Solde initial destinataire (€)", value=200000.0)
+new_dest = st.number_input("Nouveau solde destinataire (€)", value=250000.0)
+transaction_type = st.selectbox("Type de transaction", ["PAYMENT","TRANSFER","CASH_OUT","DEBIT","CASH_IN"], index=2)
+
+# Encodage type
+type_encoding = {'PAYMENT':1,'TRANSFER':2,'CASH_OUT':3,'DEBIT':4,'CASH_IN':5}
+type_encoded = type_encoding[transaction_type]
+
+# Construire features
+delta_orig = old_orig - new_orig
+delta_dest = new_dest - old_dest
+ratio_amount_orig = amount / (old_orig + 1e-5)
+features = np.array([[1,type_encoded,amount,old_orig,new_orig,old_dest,new_dest,delta_orig,delta_dest,ratio_amount_orig]])
+
+if st.button("🔍 Analyser la transaction"):
+    result = predict_fraud(features, threshold=threshold)
+    st.write("### 🎯 Résultat")
+    st.metric("Probabilité Fraude", f"{result['fraud_probability']*100:.2f}%")
+    st.metric("Ratio Montant / Solde Émetteur", f"{result['ratio_amount_orig']:.2f}")
+    st.markdown(f"**Risque:** {result['risk_level']}")
+    st.markdown(f"**Recommandation:** {result['recommendation']}")
+
+    # Jauge
+    fig = create_gauge_chart(result['fraud_probability'], "Probabilité de Fraude", result['color'])
+    st.plotly_chart(fig, use_container_width=True)
+
 
 # =============================================================================
 # HEADER
