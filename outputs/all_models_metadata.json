@@ -12,9 +12,9 @@
             "true_positives": 66612.0,
             "fraud_detection_rate": 0.9991750041249794,
             "false_alarm_rate": 0.00101,
-            "training_time_seconds": 494.002592
+            "training_time_seconds": 335.264099
         },
-        "run_id": "2c522abe-8f45-49ef-a638-7d7256f2f75c"
+        "run_id": "62c6c059-a212-42aa-aa2c-0d52aca1af93"
     },
     "Random_Forest": {
         "metrics": {
@@ -29,9 +29,9 @@
             "true_positives": 66667.0,
             "fraud_detection_rate": 1.0,
             "false_alarm_rate": 0.0,
-            "training_time_seconds": 22.330404
+            "training_time_seconds": 20.017593
         },
-        "run_id": "a2b300ba-9e4a-4a18-906d-74ced8cd202d"
+        "run_id": "f1b2617f-9546-47e3-b14c-269257e7e2f7"
     },
     "XGBoost": {
         "metrics": {
@@ -46,9 +46,9 @@
             "true_positives": 66667.0,
             "fraud_detection_rate": 1.0,
             "false_alarm_rate": 0.0,
-            "training_time_seconds": 1.454357
+            "training_time_seconds": 1.959231
         },
-        "run_id": "26fa8445-e196-4622-a9d1-481f99460f9d"
+        "run_id": "bb7f652a-f654-4edb-b09d-2b88a0d619a6"
     },
     "LightGBM": {
         "metrics": {
@@ -63,8 +63,8 @@
             "true_positives": 66667.0,
             "fraud_detection_rate": 1.0,
             "false_alarm_rate": 0.0,
-            "training_time_seconds": 2.826652
+            "training_time_seconds": 2.759825
         },
-        "run_id": "61f8c3a8-192c-4be6-85fa-1fc131fc1f79"
+        "run_id": "3c216b5b-6e94-4e6b-aca9-439a355499e8"
     }
 }
