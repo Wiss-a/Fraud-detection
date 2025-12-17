@@ -131,7 +131,7 @@
           "text": "✅ MLflow is available for experiment tracking\n\n✅ All libraries imported successfully!\nPandas version: 2.3.1\nNumPy version: 2.2.6\n"
         }
       ],
-      "execution_count": 3,
+      "execution_count": 4,
       "metadata": {
         "trusted": true,
         "execution": {
@@ -142,7 +142,7 @@
           "shell.execute_reply": "2025-12-16T13:16:09.759570Z"
         },
         "gather": {
-          "logged": 1765915157085
+          "logged": 1765956301713
         }
       }
     },
@@ -162,10 +162,10 @@
         {
           "output_type": "stream",
           "name": "stdout",
-          "text": "Requirement already satisfied: azureml-dataset-runtime in /anaconda/envs/azureml_py38/lib/python3.10/site-packages (1.61.0)\nRequirement already satisfied: pyarrow<21.0.0,>=0.17.0 in /anaconda/envs/azureml_py38/lib/python3.10/site-packages (from azureml-dataset-runtime) (14.0.2)\nRequirement already satisfied: numpy!=1.19.3,<2.3.3 in /anaconda/envs/azureml_py38/lib/python3.10/site-packages (from azureml-dataset-runtime) (1.26.4)\nRequirement already satisfied: azureml-dataprep<5.5.0a,>=5.1.0a in /anaconda/envs/azureml_py38/lib/python3.10/site-packages (from azureml-dataset-runtime) (5.1.6)\nRequirement already satisfied: cloudpickle<3.0.0,>=1.1.0 in /anaconda/envs/azureml_py38/lib/python3.10/site-packages (from azureml-dataprep<5.5.0a,>=5.1.0a->azureml-dataset-runtime) (2.2.1)\nRequirement already satisfied: pyyaml<7.0.0,>=5.1.0 in /anaconda/envs/azureml_py38/lib/python3.10/site-packages (from azureml-dataprep<5.5.0a,>=5.1.0a->azureml-dataset-runtime) (6.0.2)\nRequirement already satisfied: azureml-dataprep-rslex~=2.22.2dev0 in /anaconda/envs/azureml_py38/lib/python3.10/site-packages (from azureml-dataprep<5.5.0a,>=5.1.0a->azureml-dataset-runtime) (2.22.5)\nRequirement already satisfied: jsonschema in /anaconda/envs/azureml_py38/lib/python3.10/site-packages (from azureml-dataprep<5.5.0a,>=5.1.0a->azureml-dataset-runtime) (4.24.0)\nRequirement already satisfied: azureml-dataprep-native<42.0.0,>=41.0.0 in /anaconda/envs/azureml_py38/lib/python3.10/site-packages (from azureml-dataprep<5.5.0a,>=5.1.0a->azureml-dataset-runtime) (41.0.0)\nRequirement already satisfied: azure-identity>=1.7.0 in /anaconda/envs/azureml_py38/lib/python3.10/site-packages (from azureml-dataprep<5.5.0a,>=5.1.0a->azureml-dataset-runtime) (1.21.0)\nRequirement already satisfied: msal>=1.30.0 in /anaconda/envs/azureml_py38/lib/python3.10/site-packages (from azure-identity>=1.7.0->azureml-dataprep<5.5.0a,>=5.1.0a->azureml-dataset-runtime) (1.33.0b1)\nRequirement already satisfied: azure-core>=1.31.0 in /anaconda/envs/azureml_py38/lib/python3.10/site-packages (from azure-identity>=1.7.0->azureml-dataprep<5.5.0a,>=5.1.0a->azureml-dataset-runtime) (1.33.0)\nRequirement already satisfied: msal-extensions>=1.2.0 in /anaconda/envs/azureml_py38/lib/python3.10/site-packages (from azure-identity>=1.7.0->azureml-dataprep<5.5.0a,>=5.1.0a->azureml-dataset-runtime) (1.2.0)\nRequirement already satisfied: typing-extensions>=4.0.0 in /anaconda/envs/azureml_py38/lib/python3.10/site-packages (from azure-identity>=1.7.0->azureml-dataprep<5.5.0a,>=5.1.0a->azureml-dataset-runtime) (4.14.1)\nRequirement already satisfied: cryptography>=2.5 in /anaconda/envs/azureml_py38/lib/python3.10/site-packages (from azure-identity>=1.7.0->azureml-dataprep<5.5.0a,>=5.1.0a->azureml-dataset-runtime) (46.0.3)\nRequirement already satisfied: jsonschema-specifications>=2023.03.6 in /anaconda/envs/azureml_py38/lib/python3.10/site-packages (from jsonschema->azureml-dataprep<5.5.0a,>=5.1.0a->azureml-dataset-runtime) (2025.4.1)\nRequirement already satisfied: referencing>=0.28.4 in /anaconda/envs/azureml_py38/lib/python3.10/site-packages (from jsonschema->azureml-dataprep<5.5.0a,>=5.1.0a->azureml-dataset-runtime) (0.36.2)\nRequirement already satisfied: attrs>=22.2.0 in /anaconda/envs/azureml_py38/lib/python3.10/site-packages (from jsonschema->azureml-dataprep<5.5.0a,>=5.1.0a->azureml-dataset-runtime) (25.3.0)\nRequirement already satisfied: rpds-py>=0.7.1 in /anaconda/envs/azureml_py38/lib/python3.10/site-packages (from jsonschema->azureml-dataprep<5.5.0a,>=5.1.0a->azureml-dataset-runtime) (0.24.0)\nRequirement already satisfied: requests>=2.21.0 in /anaconda/envs/azureml_py38/lib/python3.10/site-packages (from azure-core>=1.31.0->azure-identity>=1.7.0->azureml-dataprep<5.5.0a,>=5.1.0a->azureml-dataset-runtime) (2.32.4)\nRequirement already satisfied: six>=1.11.0 in /anaconda/envs/azureml_py38/lib/python3.10/site-packages (from azure-core>=1.31.0->azure-identity>=1.7.0->azureml-dataprep<5.5.0a,>=5.1.0a->azureml-dataset-runtime) (1.17.0)\nRequirement already satisfied: cffi>=2.0.0 in /anaconda/envs/azureml_py38/lib/python3.10/site-packages (from cryptography>=2.5->azure-identity>=1.7.0->azureml-dataprep<5.5.0a,>=5.1.0a->azureml-dataset-runtime) (2.0.0)\nRequirement already satisfied: PyJWT[crypto]<3,>=1.0.0 in /anaconda/envs/azureml_py38/lib/python3.10/site-packages (from msal>=1.30.0->azure-identity>=1.7.0->azureml-dataprep<5.5.0a,>=5.1.0a->azureml-dataset-runtime) (2.4.0)\nRequirement already satisfied: portalocker<3,>=1.4 in /anaconda/envs/azureml_py38/lib/python3.10/site-packages (from msal-extensions>=1.2.0->azure-identity>=1.7.0->azureml-dataprep<5.5.0a,>=5.1.0a->azureml-dataset-runtime) (2.10.1)\nRequirement already satisfied: pycparser in /anaconda/envs/azureml_py38/lib/python3.10/site-packages (from cffi>=2.0.0->cryptography>=2.5->azure-identity>=1.7.0->azureml-dataprep<5.5.0a,>=5.1.0a->azureml-dataset-runtime) (2.22)\nRequirement already satisfied: idna<4,>=2.5 in /anaconda/envs/azureml_py38/lib/python3.10/site-packages (from requests>=2.21.0->azure-core>=1.31.0->azure-identity>=1.7.0->azureml-dataprep<5.5.0a,>=5.1.0a->azureml-dataset-runtime) (3.10)\nRequirement already satisfied: charset_normalizer<4,>=2 in /anaconda/envs/azureml_py38/lib/python3.10/site-packages (from requests>=2.21.0->azure-core>=1.31.0->azure-identity>=1.7.0->azureml-dataprep<5.5.0a,>=5.1.0a->azureml-dataset-runtime) (3.4.2)\nRequirement already satisfied: urllib3<3,>=1.21.1 in /anaconda/envs/azureml_py38/lib/python3.10/site-packages (from requests>=2.21.0->azure-core>=1.31.0->azure-identity>=1.7.0->azureml-dataprep<5.5.0a,>=5.1.0a->azureml-dataset-runtime) (2.5.0)\nRequirement already satisfied: certifi>=2017.4.17 in /anaconda/envs/azureml_py38/lib/python3.10/site-packages (from requests>=2.21.0->azure-core>=1.31.0->azure-identity>=1.7.0->azureml-dataprep<5.5.0a,>=5.1.0a->azureml-dataset-runtime) (2025.7.9)\n"
+          "text": "Requirement already satisfied: azureml-dataset-runtime in /anaconda/envs/azureml_py38/lib/python3.10/site-packages (1.61.0)\nRequirement already satisfied: numpy!=1.19.3,<2.3.3 in /anaconda/envs/azureml_py38/lib/python3.10/site-packages (from azureml-dataset-runtime) (1.26.4)\nRequirement already satisfied: azureml-dataprep<5.5.0a,>=5.1.0a in /anaconda/envs/azureml_py38/lib/python3.10/site-packages (from azureml-dataset-runtime) (5.1.6)\nRequirement already satisfied: pyarrow<21.0.0,>=0.17.0 in /anaconda/envs/azureml_py38/lib/python3.10/site-packages (from azureml-dataset-runtime) (14.0.2)\nRequirement already satisfied: azureml-dataprep-native<42.0.0,>=41.0.0 in /anaconda/envs/azureml_py38/lib/python3.10/site-packages (from azureml-dataprep<5.5.0a,>=5.1.0a->azureml-dataset-runtime) (41.0.0)\nRequirement already satisfied: azure-identity>=1.7.0 in /anaconda/envs/azureml_py38/lib/python3.10/site-packages (from azureml-dataprep<5.5.0a,>=5.1.0a->azureml-dataset-runtime) (1.21.0)\nRequirement already satisfied: jsonschema in /anaconda/envs/azureml_py38/lib/python3.10/site-packages (from azureml-dataprep<5.5.0a,>=5.1.0a->azureml-dataset-runtime) (4.24.0)\nRequirement already satisfied: cloudpickle<3.0.0,>=1.1.0 in /anaconda/envs/azureml_py38/lib/python3.10/site-packages (from azureml-dataprep<5.5.0a,>=5.1.0a->azureml-dataset-runtime) (2.2.1)\nRequirement already satisfied: pyyaml<7.0.0,>=5.1.0 in /anaconda/envs/azureml_py38/lib/python3.10/site-packages (from azureml-dataprep<5.5.0a,>=5.1.0a->azureml-dataset-runtime) (6.0.2)\nRequirement already satisfied: azureml-dataprep-rslex~=2.22.2dev0 in /anaconda/envs/azureml_py38/lib/python3.10/site-packages (from azureml-dataprep<5.5.0a,>=5.1.0a->azureml-dataset-runtime) (2.22.5)\nRequirement already satisfied: msal-extensions>=1.2.0 in /anaconda/envs/azureml_py38/lib/python3.10/site-packages (from azure-identity>=1.7.0->azureml-dataprep<5.5.0a,>=5.1.0a->azureml-dataset-runtime) (1.2.0)\nRequirement already satisfied: cryptography>=2.5 in /anaconda/envs/azureml_py38/lib/python3.10/site-packages (from azure-identity>=1.7.0->azureml-dataprep<5.5.0a,>=5.1.0a->azureml-dataset-runtime) (46.0.3)\nRequirement already satisfied: typing-extensions>=4.0.0 in /anaconda/envs/azureml_py38/lib/python3.10/site-packages (from azure-identity>=1.7.0->azureml-dataprep<5.5.0a,>=5.1.0a->azureml-dataset-runtime) (4.14.1)\nRequirement already satisfied: azure-core>=1.31.0 in /anaconda/envs/azureml_py38/lib/python3.10/site-packages (from azure-identity>=1.7.0->azureml-dataprep<5.5.0a,>=5.1.0a->azureml-dataset-runtime) (1.33.0)\nRequirement already satisfied: msal>=1.30.0 in /anaconda/envs/azureml_py38/lib/python3.10/site-packages (from azure-identity>=1.7.0->azureml-dataprep<5.5.0a,>=5.1.0a->azureml-dataset-runtime) (1.33.0b1)\nRequirement already satisfied: attrs>=22.2.0 in /anaconda/envs/azureml_py38/lib/python3.10/site-packages (from jsonschema->azureml-dataprep<5.5.0a,>=5.1.0a->azureml-dataset-runtime) (25.3.0)\nRequirement already satisfied: jsonschema-specifications>=2023.03.6 in /anaconda/envs/azureml_py38/lib/python3.10/site-packages (from jsonschema->azureml-dataprep<5.5.0a,>=5.1.0a->azureml-dataset-runtime) (2025.4.1)\nRequirement already satisfied: rpds-py>=0.7.1 in /anaconda/envs/azureml_py38/lib/python3.10/site-packages (from jsonschema->azureml-dataprep<5.5.0a,>=5.1.0a->azureml-dataset-runtime) (0.24.0)\nRequirement already satisfied: referencing>=0.28.4 in /anaconda/envs/azureml_py38/lib/python3.10/site-packages (from jsonschema->azureml-dataprep<5.5.0a,>=5.1.0a->azureml-dataset-runtime) (0.36.2)\nRequirement already satisfied: requests>=2.21.0 in /anaconda/envs/azureml_py38/lib/python3.10/site-packages (from azure-core>=1.31.0->azure-identity>=1.7.0->azureml-dataprep<5.5.0a,>=5.1.0a->azureml-dataset-runtime) (2.32.4)\nRequirement already satisfied: six>=1.11.0 in /anaconda/envs/azureml_py38/lib/python3.10/site-packages (from azure-core>=1.31.0->azure-identity>=1.7.0->azureml-dataprep<5.5.0a,>=5.1.0a->azureml-dataset-runtime) (1.17.0)\nRequirement already satisfied: cffi>=2.0.0 in /anaconda/envs/azureml_py38/lib/python3.10/site-packages (from cryptography>=2.5->azure-identity>=1.7.0->azureml-dataprep<5.5.0a,>=5.1.0a->azureml-dataset-runtime) (2.0.0)\nRequirement already satisfied: PyJWT[crypto]<3,>=1.0.0 in /anaconda/envs/azureml_py38/lib/python3.10/site-packages (from msal>=1.30.0->azure-identity>=1.7.0->azureml-dataprep<5.5.0a,>=5.1.0a->azureml-dataset-runtime) (2.4.0)\nRequirement already satisfied: portalocker<3,>=1.4 in /anaconda/envs/azureml_py38/lib/python3.10/site-packages (from msal-extensions>=1.2.0->azure-identity>=1.7.0->azureml-dataprep<5.5.0a,>=5.1.0a->azureml-dataset-runtime) (2.10.1)\nRequirement already satisfied: pycparser in /anaconda/envs/azureml_py38/lib/python3.10/site-packages (from cffi>=2.0.0->cryptography>=2.5->azure-identity>=1.7.0->azureml-dataprep<5.5.0a,>=5.1.0a->azureml-dataset-runtime) (2.22)\nRequirement already satisfied: charset_normalizer<4,>=2 in /anaconda/envs/azureml_py38/lib/python3.10/site-packages (from requests>=2.21.0->azure-core>=1.31.0->azure-identity>=1.7.0->azureml-dataprep<5.5.0a,>=5.1.0a->azureml-dataset-runtime) (3.4.2)\nRequirement already satisfied: urllib3<3,>=1.21.1 in /anaconda/envs/azureml_py38/lib/python3.10/site-packages (from requests>=2.21.0->azure-core>=1.31.0->azure-identity>=1.7.0->azureml-dataprep<5.5.0a,>=5.1.0a->azureml-dataset-runtime) (2.5.0)\nRequirement already satisfied: idna<4,>=2.5 in /anaconda/envs/azureml_py38/lib/python3.10/site-packages (from requests>=2.21.0->azure-core>=1.31.0->azure-identity>=1.7.0->azureml-dataprep<5.5.0a,>=5.1.0a->azureml-dataset-runtime) (3.10)\nRequirement already satisfied: certifi>=2017.4.17 in /anaconda/envs/azureml_py38/lib/python3.10/site-packages (from requests>=2.21.0->azure-core>=1.31.0->azure-identity>=1.7.0->azureml-dataprep<5.5.0a,>=5.1.0a->azureml-dataset-runtime) (2025.7.9)\n"
         }
       ],
-      "execution_count": 4,
+      "execution_count": 5,
       "metadata": {
         "gather": {
           "logged": 1765906716103
@@ -215,7 +215,7 @@
         {
           "output_type": "stream",
           "name": "stdout",
-          "text": "📂 Loading dataset...\nFile: fraud_dataset.csv\nLoading started at: 2025-12-16 19:59:21\n\n{'infer_column_types': 'False', 'activity': 'to_pandas_dataframe'}\n{'infer_column_types': 'False', 'activity': 'to_pandas_dataframe', 'activityApp': 'TabularDataset'}\n✅ Dataset loaded successfully!\nLoading completed at: 2025-12-16 19:59:32\n\n============================================================\nDATASET OVERVIEW\n============================================================\nTotal rows: 6,362,620\nTotal columns: 11\nMemory usage: 1610.36 MB\n\nFirst few rows:\n"
+          "text": "📂 Loading dataset...\nFile: fraud_dataset.csv\nLoading started at: 2025-12-17 07:25:13\n\n{'infer_column_types': 'False', 'activity': 'to_pandas_dataframe'}\n{'infer_column_types': 'False', 'activity': 'to_pandas_dataframe', 'activityApp': 'TabularDataset'}\n✅ Dataset loaded successfully!\nLoading completed at: 2025-12-17 07:25:23\n\n============================================================\nDATASET OVERVIEW\n============================================================\nTotal rows: 6,362,620\nTotal columns: 11\nMemory usage: 1610.36 MB\n\nFirst few rows:\n"
         },
         {
           "output_type": "display_data",
@@ -226,11 +226,11 @@
           "metadata": {}
         }
       ],
-      "execution_count": 5,
+      "execution_count": 6,
       "metadata": {
         "trusted": true,
         "gather": {
-          "logged": 1765915178176
+          "logged": 1765956328696
         }
       }
     },
@@ -272,11 +272,11 @@
           "metadata": {}
         }
       ],
-      "execution_count": 6,
+      "execution_count": 7,
       "metadata": {
         "trusted": true,
         "gather": {
-          "logged": 1765915181420
+          "logged": 1765956335606
         }
       }
     },
@@ -347,11 +347,11 @@
           "text": "\n⚠️ This dataset is highly imbalanced - balancing is necessary!\n"
         }
       ],
-      "execution_count": 7,
+      "execution_count": 8,
       "metadata": {
         "trusted": true,
         "gather": {
-          "logged": 1765915181828
+          "logged": 1765956340377
         }
       }
     },
@@ -423,11 +423,11 @@
           "text": "============================================================\nDATASET TRUNCATION\n============================================================\n\n📊 Original Split:\nFraud cases:     8,213\nNon-fraud cases: 6,354,407\n\n✂️ Truncation Strategy:\n✓ Keep ALL 8,213 fraud cases\n✓ Sample 500,000 non-fraud cases\n\n✅ Truncation Complete!\n\n📊 Truncated Dataset:\nTotal rows: 508,213\nFraud:      8,213\nNon-fraud:  500,000\n\nNew Imbalance Ratio: 1:60.9\nSize reduction: 92.0%\n\n🧹 Memory cleaned up\n"
         }
       ],
-      "execution_count": 8,
+      "execution_count": 9,
       "metadata": {
         "trusted": true,
         "gather": {
-          "logged": 1765915184681
+          "logged": 1765956348473
         }
       }
     },
@@ -518,7 +518,7 @@
       "metadata": {
         "trusted": true,
         "gather": {
-          "logged": 1765915201600
+          "logged": 1765956366632
         }
       }
     },
@@ -616,11 +616,11 @@
           "text": "============================================================\nDATA BALANCING WITH SMOTE\n============================================================\n\n📊 Before Balancing:\nFeatures shape: (508213, 10)\nTarget distribution:\nisFraud\nFalse    500000\nTrue       8213\nName: count, dtype: int64\nFraud ratio: 1.62%\n\n🎯 Target Balance:\nDesired fraud ratio: 40%\nSampling strategy: 0.667\n\n⚙️ Applying SMOTE...\n\n✅ SMOTE Complete!\n\n📊 After Balancing:\nFeatures shape: (833333, 10)\nTarget distribution:\nisFraud\nFalse    500000\nTrue     333333\nName: count, dtype: int64\n\nFraud ratio: 40.00%\nTotal samples: 833,333\nSynthetic samples created: 325,120\n"
         }
       ],
-      "execution_count": 12,
+      "execution_count": 11,
       "metadata": {
         "trusted": true,
         "gather": {
-          "logged": 1765915202063
+          "logged": 1765956376870
         }
       }
     },
@@ -668,11 +668,11 @@
           "text": "\n📈 Dataset is now balanced and ready for training!\n"
         }
       ],
-      "execution_count": 13,
+      "execution_count": 12,
       "metadata": {
         "trusted": true,
         "gather": {
-          "logged": 1765915202427
+          "logged": 1765956390958
         }
       }
     },
@@ -730,11 +730,11 @@
           "text": "============================================================\nTRAIN-TEST SPLIT & FEATURE SCALING\n============================================================\n\n✅ Data split complete:\n\nTraining set:   666,666 samples (80%)\nTest set:       166,667 samples (20%)\nNumber of features: 10\n\n📊 Class distribution:\nTrain - Fraud: 40.00%\nTest  - Fraud: 40.00%\n\n⚙️ Applying feature scaling...\n✅ Scaling complete using RobustScaler\n\n📦 Data is now ready for model training!\n"
         }
       ],
-      "execution_count": 14,
+      "execution_count": 13,
       "metadata": {
         "trusted": true,
         "gather": {
-          "logged": 1765915204255
+          "logged": 1765956410239
         }
       }
     },
@@ -2295,21 +2295,24 @@
     },
     {
       "cell_type": "code",
-      "source": [],
+      "source": [
+        "# Avant le train_test_split, vous aviez quelque chose comme:\n",
+        "X = df_processed.drop(columns=['isFraud'])\n",
+        "\n",
+        "# EXÉCUTEZ CECI pour voir vos features:\n",
+        "print(X.columns.tolist())"
+      ],
       "outputs": [
         {
-          "output_type": "error",
-          "ename": "SyntaxError",
-          "evalue": "invalid syntax (3190249082.py, line 1)",
-          "traceback": [
-            "\u001b[0;36m  Cell \u001b[0;32mIn[65], line 1\u001b[0;36m\u001b[0m\n\u001b[0;31m    git init\u001b[0m\n\u001b[0m        ^\u001b[0m\n\u001b[0;31mSyntaxError\u001b[0m\u001b[0;31m:\u001b[0m invalid syntax\n"
-          ]
+          "output_type": "stream",
+          "name": "stdout",
+          "text": "['step', 'type', 'amount', 'nameOrig', 'oldbalanceOrg', 'newbalanceOrig', 'nameDest', 'oldbalanceDest', 'newbalanceDest', 'isFlaggedFraud']\n"
         }
       ],
-      "execution_count": 65,
+      "execution_count": 14,
       "metadata": {
         "gather": {
-          "logged": 1765924758360
+          "logged": 1765956421664
         }
       }
     }
