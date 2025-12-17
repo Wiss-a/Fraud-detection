@@ -113,33 +113,51 @@ def load_models():
             with open('outputs/metadata.json', 'r') as f:
                 metadata = json.load(f)
         except:
-            metadata = {'best_model': 'XGBoost', 'all_models': {}}
+            metadata = {
+                'best_model': 'XGBoost',
+                'optimal_threshold': 0.5,  # Fallback si pas dans metadata
+                'all_models': {}
+            }
         
-        return model, scaler, metadata, None
+        # Extraire le seuil optimal
+        optimal_threshold = metadata.get('optimal_threshold', 0.5)
+        
+        return model, scaler, metadata, optimal_threshold, None
         
     except Exception as e:
-        return None, None, None, str(e)
+        return None, None, None, None, str(e)
 
-model, scaler, metadata, error = load_models()
+model, scaler, metadata, optimal_threshold, error = load_models()
 
 # =============================================================================
 # FONCTIONS UTILITAIRES
 # =============================================================================
 
-def predict_fraud(input_data):
-    """Fait une prédiction de fraude"""
+def predict_fraud(input_data, threshold=None):
+    """
+    Fait une prédiction de fraude
+    
+    Args:
+        input_data: array numpy des features
+        threshold: seuil de décision (si None, utilise optimal_threshold)
+    """
     try:
         if len(input_data.shape) == 1:
             input_data = input_data.reshape(1, -1)
         
+        # Utiliser le seuil optimal si non spécifié
+        if threshold is None:
+            threshold = optimal_threshold
+        
         # Scaling
         scaled_data = scaler.transform(input_data)
         
-        # Prédiction
-        prediction = model.predict(scaled_data)[0]
+        # Prédiction avec seuil personnalisé
         probabilities = model.predict_proba(scaled_data)[0]
-        
         fraud_prob = float(probabilities[1])
+        
+        # Appliquer le seuil optimal au lieu de model.predict()
+        prediction = 1 if fraud_prob >= threshold else 0
         
         # Déterminer le niveau de risque
         if fraud_prob >= 0.7:
@@ -162,7 +180,8 @@ def predict_fraud(input_data):
             'confidence': float(max(probabilities)),
             'risk_level': risk_level,
             'recommendation': recommendation,
-            'color': color
+            'color': color,
+            'threshold_used': threshold
         }
         
     except Exception as e:
@@ -263,6 +282,7 @@ st.sidebar.header("📊 Informations du Modèle")
 
 if metadata:
     st.sidebar.success(f"**Modèle Actif:** {metadata.get('best_model', 'XGBoost')}")
+    st.sidebar.info(f"**Seuil Optimal:** {optimal_threshold:.3f}")
     
     if 'all_models' in metadata and metadata['all_models']:
         best_model_name = metadata.get('best_model', list(metadata['all_models'].keys())[0])
