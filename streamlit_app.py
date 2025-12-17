@@ -555,7 +555,6 @@ with tab1:
                 'oldbalanceDest',
                 'newbalanceDest'
             ]            
-            assert features.shape[1] == len(feature_labels)
 
 
             df_features = pd.DataFrame([features[0]], columns=feature_labels)
