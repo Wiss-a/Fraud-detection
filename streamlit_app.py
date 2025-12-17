@@ -565,11 +565,15 @@ with tab1:
         )
     
     if analyze_button:
-        # ===================================================================
-        # CONSTRUCTION DES FEATURES (DOIT CORRESPONDRE AU TRAINING!)
-        # ===================================================================
+        st.markdown("---")
+        st.markdown("## 🔬 DIAGNOSTIC COMPLET")
         
-        # 1. Encoder le type de transaction (EXACTEMENT comme au training)
+        # ===================================================================
+        # 1. CONSTRUCTION DES FEATURES
+        # ===================================================================
+        st.subheader("1️⃣ Construction du Vecteur de Features")
+        
+        # Encoder le type
         type_encoding = {
             'PAYMENT': 1, 
             'TRANSFER': 2, 
@@ -579,167 +583,290 @@ with tab1:
         }
         type_encoded = type_encoding.get(transaction_type, 0)
         
-        # 2. Step (utiliser 1 comme valeur par défaut en temps réel)
-        step = 1
-        
-        # 3. Construire le vecteur de features DANS LE BON ORDRE
-        # ORDRE CRITIQUE: step, type, amount, oldbalanceOrg, newbalanceOrig, oldbalanceDest, newbalanceDest
+        # Construire features
         features = np.array([[
-            step,                    # Feature 0: step
-            type_encoded,            # Feature 1: type (1-5)
-            amount,                  # Feature 2: amount
-            old_balance_orig,        # Feature 3: oldbalanceOrg
-            new_balance_orig,        # Feature 4: newbalanceOrig
-            old_balance_dest,        # Feature 5: oldbalanceDest
-            new_balance_dest         # Feature 6: newbalanceDest
+            1,                      # step
+            type_encoded,           # type
+            amount,                 # amount
+            old_balance_orig,       # oldbalanceOrg
+            new_balance_orig,       # newbalanceOrig
+            old_balance_dest,       # oldbalanceDest
+            new_balance_dest        # newbalanceDest
         ]])
         
-        # 4. VALIDATION DES FEATURES
-        st.info(f"🔍 Vecteur de features construit: {features.shape[1]} features")
+        # Afficher les features BRUTES
+        col1, col2 = st.columns(2)
+        with col1:
+            st.write("**Features BRUTES:**")
+            df_raw = pd.DataFrame({
+                'Feature': ['step', 'type', 'amount', 'oldbalanceOrg', 
+                           'newbalanceOrig', 'oldbalanceDest', 'newbalanceDest'],
+                'Valeur': features[0]
+            })
+            st.dataframe(df_raw, use_container_width=True)
         
-        # Debug: Afficher les features
-        with st.expander("🔬 Debug: Voir les features calculées"):
-            st.write("**Features envoyées au modèle:**")
-            feature_labels = [
-                'step', 'type', 'amount', 
-                'oldbalanceOrg', 'newbalanceOrig', 
-                'oldbalanceDest', 'newbalanceDest'
-            ]
-            
-            df_features = pd.DataFrame([features[0]], columns=feature_labels)
-            st.dataframe(df_features.style.highlight_max(axis=1))
-            
-            # Afficher après scaling
-            st.write("**Après scaling (RobustScaler):**")
-            scaled = scaler.transform(features)
-            df_scaled = pd.DataFrame([scaled[0]], columns=feature_labels)
-            st.dataframe(df_scaled)
-            
-            # Statistiques
-            st.write("**Statistiques:**")
-            st.write(f"- Type encodé: {type_encoded} ({transaction_type})")
-            st.write(f"- Montant: {amount:,.2f} €")
-            st.write(f"- Variation solde émetteur: {old_balance_orig - new_balance_orig:,.2f} €")
-            st.write(f"- Variation solde destinataire: {new_balance_dest - old_balance_dest:,.2f} €")
+        with col2:
+            st.write("**Informations:**")
+            st.metric("Type Transaction", f"{transaction_type} (code: {type_encoded})")
+            st.metric("Montant", f"{amount:,.2f} €")
+            st.metric("Δ Solde Émetteur", f"{old_balance_orig - new_balance_orig:,.2f} €")
+            st.metric("Δ Solde Destinataire", f"{new_balance_dest - old_balance_dest:,.2f} €")
         
-        # Animation de chargement
-        with st.spinner("⏳ Analyse en cours..."):
-            import time
-            time.sleep(0.5)
-            
-            # Faire la prédiction
-            result = predict_fraud(features)
+        # ===================================================================
+        # 2. SCALING
+        # ===================================================================
+        st.markdown("---")
+        st.subheader("2️⃣ Application du Scaling")
         
-        if result:
-            st.success("✅ **Analyse terminée!**")
+        try:
+            scaled_data = scaler.transform(features)
+            st.success("✅ Scaling appliqué avec succès")
             
-            # Affichage du résultat principal
-            st.markdown("## 🎯 Résultat de l'Analyse")
+            col1, col2 = st.columns(2)
+            with col1:
+                st.write("**Features APRÈS Scaling:**")
+                df_scaled = pd.DataFrame({
+                    'Feature': ['step', 'type', 'amount', 'oldbalanceOrg', 
+                               'newbalanceOrig', 'oldbalanceDest', 'newbalanceDest'],
+                    'Valeur Scalée': scaled_data[0]
+                })
+                st.dataframe(df_scaled, use_container_width=True)
             
-            # Alerte visuelle (CODE RESTE IDENTIQUE)
-            if result['is_fraud']:
+            with col2:
+                st.write("**Statistiques du Scaling:**")
+                st.write(f"Min: {scaled_data[0].min():.4f}")
+                st.write(f"Max: {scaled_data[0].max():.4f}")
+                st.write(f"Mean: {scaled_data[0].mean():.4f}")
+                st.write(f"Std: {scaled_data[0].std():.4f}")
+                
+        except Exception as e:
+            st.error(f"❌ Erreur lors du scaling: {str(e)}")
+            st.stop()
+        
+        # ===================================================================
+        # 3. PRÉDICTION BRUTE
+        # ===================================================================
+        st.markdown("---")
+        st.subheader("3️⃣ Prédiction du Modèle")
+        
+        try:
+            # Probabilités
+            probabilities = model.predict_proba(scaled_data)[0]
+            fraud_prob = float(probabilities[1])
+            legit_prob = float(probabilities[0])
+            
+            # Prédiction binaire avec différents seuils
+            pred_050 = 1 if fraud_prob >= 0.50 else 0
+            pred_077 = 1 if fraud_prob >= 0.77 else 0
+            pred_030 = 1 if fraud_prob >= 0.30 else 0
+            
+            st.success("✅ Prédiction réussie")
+            
+            # Affichage des probabilités
+            col1, col2, col3 = st.columns(3)
+            
+            with col1:
+                st.metric(
+                    "Probabilité FRAUDE",
+                    f"{fraud_prob*100:.2f}%",
+                    delta=f"{(fraud_prob - 0.5)*100:+.1f}% vs seuil 0.5"
+                )
+            
+            with col2:
+                st.metric(
+                    "Probabilité LÉGITIME",
+                    f"{legit_prob*100:.2f}%"
+                )
+            
+            with col3:
+                st.metric(
+                    "Confiance",
+                    f"{max(probabilities)*100:.2f}%"
+                )
+            
+            # Tableau de décision selon les seuils
+            st.write("**Décision selon différents seuils:**")
+            decision_df = pd.DataFrame({
+                'Seuil': ['0.30 (Sensible)', '0.50 (Standard)', '0.77 (Training Optimal)'],
+                'Probabilité Fraude': [f"{fraud_prob*100:.2f}%"] * 3,
+                'Décision': [
+                    '🚨 FRAUDE' if pred_030 == 1 else '✅ LÉGITIME',
+                    '🚨 FRAUDE' if pred_050 == 1 else '✅ LÉGITIME',
+                    '🚨 FRAUDE' if pred_077 == 1 else '✅ LÉGITIME'
+                ],
+                'Dépasse Seuil?': [
+                    '✅ OUI' if fraud_prob >= 0.30 else '❌ NON',
+                    '✅ OUI' if fraud_prob >= 0.50 else '❌ NON',
+                    '✅ OUI' if fraud_prob >= 0.77 else '❌ NON'
+                ]
+            })
+            st.dataframe(decision_df, use_container_width=True)
+            
+            # ⚠️ ALERTE SI PROBABILITÉ ÉLEVÉE MAIS PAS DÉTECTÉE
+            if fraud_prob >= 0.60 and pred_050 == 0:
+                st.error("""
+                ⚠️ **INCOHÉRENCE DÉTECTÉE!**
+                
+                La probabilité de fraude est élevée ({:.1f}%) mais la transaction 
+                n'est pas classée comme fraude avec le seuil standard de 0.5.
+                
+                **Cela ne devrait PAS arriver!**
+                """.format(fraud_prob*100))
+            
+            # ===================================================================
+            # 4. ANALYSE DES FEATURES IMPORTANTES
+            # ===================================================================
+            st.markdown("---")
+            st.subheader("4️⃣ Analyse des Features")
+            
+            # Vérifier si le modèle a feature_importances_
+            if hasattr(model, 'feature_importances_'):
+                importances = model.feature_importances_
+                feature_names = ['step', 'type', 'amount', 'oldbalanceOrg', 
+                               'newbalanceOrig', 'oldbalanceDest', 'newbalanceDest']
+                
+                importance_df = pd.DataFrame({
+                    'Feature': feature_names,
+                    'Importance': importances,
+                    'Valeur Brute': features[0],
+                    'Valeur Scalée': scaled_data[0]
+                }).sort_values('Importance', ascending=False)
+                
+                st.write("**Importance des Features (selon le modèle):**")
+                st.dataframe(importance_df, use_container_width=True)
+                
+                # Graphique
+                fig = px.bar(
+                    importance_df, 
+                    x='Feature', 
+                    y='Importance',
+                    title='Importance des Features dans le Modèle'
+                )
+                st.plotly_chart(fig, use_container_width=True)
+            
+            # ===================================================================
+            # 5. VÉRIFICATIONS DE COHÉRENCE
+            # ===================================================================
+            st.markdown("---")
+            st.subheader("5️⃣ Vérifications de Cohérence")
+            
+            checks = []
+            
+            # Check 1: Cohérence des soldes
+            delta_orig = old_balance_orig - new_balance_orig
+            if abs(delta_orig - amount) > 0.01:
+                checks.append({
+                    'Check': 'Cohérence Solde Émetteur',
+                    'Status': '⚠️ INCOHÉRENT',
+                    'Détail': f'Δ solde ({delta_orig:.2f}) ≠ montant ({amount:.2f})'
+                })
+            else:
+                checks.append({
+                    'Check': 'Cohérence Solde Émetteur',
+                    'Status': '✅ OK',
+                    'Détail': f'Δ solde = montant'
+                })
+            
+            # Check 2: Soldes négatifs
+            if new_balance_orig < 0 or new_balance_dest < 0:
+                checks.append({
+                    'Check': 'Soldes Positifs',
+                    'Status': '⚠️ SOLDE NÉGATIF',
+                    'Détail': 'Un solde est négatif (suspect)'
+                })
+            else:
+                checks.append({
+                    'Check': 'Soldes Positifs',
+                    'Status': '✅ OK',
+                    'Détail': 'Tous les soldes sont positifs'
+                })
+            
+            # Check 3: Transaction suspecte
+            if amount > old_balance_orig * 1.5:
+                checks.append({
+                    'Check': 'Montant vs Solde',
+                    'Status': '⚠️ SUSPECT',
+                    'Détail': f'Montant ({amount:.0f}€) > 150% du solde initial'
+                })
+            else:
+                checks.append({
+                    'Check': 'Montant vs Solde',
+                    'Status': '✅ OK',
+                    'Détail': 'Montant cohérent avec le solde'
+                })
+            
+            # Check 4: Type de transaction
+            if transaction_type in ['CASH_OUT', 'TRANSFER'] and amount > 10000:
+                checks.append({
+                    'Check': 'Type & Montant',
+                    'Status': '⚠️ RISQUE ÉLEVÉ',
+                    'Détail': f'{transaction_type} de {amount:,.0f}€ (suspect)'
+                })
+            else:
+                checks.append({
+                    'Check': 'Type & Montant',
+                    'Status': '✅ OK',
+                    'Détail': 'Combinaison normale'
+                })
+            
+            checks_df = pd.DataFrame(checks)
+            st.dataframe(checks_df, use_container_width=True)
+            
+            # ===================================================================
+            # 6. RÉSULTAT FINAL
+            # ===================================================================
+            st.markdown("---")
+            st.markdown("## 🎯 RÉSULTAT FINAL")
+            
+            # Utiliser seuil 0.5
+            final_decision = 1 if fraud_prob >= 0.5 else 0
+            
+            if final_decision == 1:
                 st.markdown(
                     '<div class="alert-fraud">🚨 ALERTE FRAUDE DÉTECTÉE 🚨</div>',
                     unsafe_allow_html=True
                 )
-            elif result['risk_level'] == "MEDIUM":
-                st.markdown(
-                    '<div class="alert-warning">⚠️ TRANSACTION SUSPECTE - VÉRIFICATION REQUISE</div>',
-                    unsafe_allow_html=True
-                )
             else:
-                st.markdown(
-                    '<div class="alert-safe">✅ TRANSACTION LÉGITIME</div>',
-                    unsafe_allow_html=True
-                )
+                if fraud_prob >= 0.3:
+                    st.markdown(
+                        '<div class="alert-warning">⚠️ TRANSACTION SUSPECTE</div>',
+                        unsafe_allow_html=True
+                    )
+                else:
+                    st.markdown(
+                        '<div class="alert-safe">✅ TRANSACTION LÉGITIME</div>',
+                        unsafe_allow_html=True
+                    )
             
-            st.markdown("---")
-            
-            # Métriques principales
-            col_m1, col_m2, col_m3, col_m4 = st.columns(4)
-            
-            with col_m1:
-                st.metric(
-                    "🆔 Transaction ID",
-                    f"TXN_{datetime.now().strftime('%Y%m%d%H%M%S')}"
-                )
-            
-            with col_m2:
-                delta_color = "inverse" if result['risk_level'] == "HIGH" else "off"
-                st.metric(
-                    "⚠️ Niveau de Risque",
-                    result['risk_level'],
-                    delta="CRITIQUE" if result['risk_level'] == "HIGH" else None,
-                    delta_color=delta_color
-                )
-            
-            with col_m3:
-                st.metric(
-                    "📊 Probabilité Fraude",
-                    f"{result['fraud_probability']*100:.1f}%"
-                )
-            
-            with col_m4:
-                st.metric(
-                    "🎯 Confiance",
-                    f"{result['confidence']*100:.1f}%"
-                )
-            
-            st.markdown("---")
-            
-            # Visualisations
-            col_viz1, col_viz2 = st.columns(2)
-            
-            with col_viz1:
-                fig_gauge = create_gauge_chart(
-                    result['fraud_probability'],
-                    "Probabilité de Fraude",
-                    result['color']
-                )
-                st.plotly_chart(fig_gauge, use_container_width=True)
-            
-            with col_viz2:
-                fig_dist = create_probability_distribution(result['fraud_probability'])
-                st.plotly_chart(fig_dist, use_container_width=True)
-            
-            st.markdown("---")
-            
-            # Recommandations
+            # Recommandation
             st.markdown("### 💡 Recommandation")
-            
-            if result['fraud_probability'] >= 0.7:
-                st.error(f"""
-                **{result['recommendation']}**
+            if fraud_prob >= 0.7:
+                st.error("""
+                **🚫 BLOQUER LA TRANSACTION**
                 
                 **Actions immédiates:**
-                - 🚫 Bloquer la transaction
-                - 📞 Contacter le client
-                - 🔍 Vérifier l'identité
-                - 🚨 Alerter le département fraude
+                - Bloquer la transaction
+                - Contacter le client immédiatement
+                - Vérifier l'identité
+                - Alerter le département fraude
                 """)
-            elif result['fraud_probability'] >= 0.4:
-                st.warning(f"""
-                **{result['recommendation']}**
+            elif fraud_prob >= 0.4:
+                st.warning("""
+                **⚠️ SUSPENDRE ET VÉRIFIER**
                 
                 **Actions recommandées:**
-                - ⚠️ Suspendre temporairement
-                - 📱 Envoyer SMS de vérification
-                - 🔐 Demander authentification 2FA
+                - Suspendre temporairement
+                - Envoyer SMS de vérification
+                - Demander authentification 2FA
                 """)
             else:
-                st.success(f"""
-                **{result['recommendation']}**
+                st.success("""
+                **✅ APPROUVER**
                 
-                **Actions:**
-                - ✅ Approuver la transaction
-                - 📊 Surveillance standard
+                Transaction sûre - Surveillance standard
                 """)
+            
+        except Exception as e:
+            st.error(f"❌ Erreur lors de la prédiction: {str(e)}")
+            st.exception(e)
 
-# TAB 2 et 3 restent identiques...
-with tab2:
-    st.header("📊 Analyse Batch - En construction")
-    st.info("Cette fonctionnalité sera disponible prochainement")
-
-with tab3:
-    st.header("📈 Statistiques - En construction")
-    st.info("Cette fonctionnalité sera disponible prochainement")
