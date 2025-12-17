@@ -1,0 +1,16 @@
+name: fraud-detection-env
+channels:
+  - conda-forge
+  - defaults
+dependencies:
+  - python=3.10
+  - pip
+  - pip:
+    - azureml-defaults>=1.38.0
+    - inference-schema
+    - scikit-learn==1.0.2
+    - pandas==1.4.4
+    - numpy==1.22.4
+    - joblib==1.1.0
+    - xgboost==1.6.2
+    - lightgbm==3.3.5
