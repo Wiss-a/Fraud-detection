@@ -433,10 +433,12 @@ with tab1:
         with col1:
             st.write("**Features BRUTES:**")
             df_raw = pd.DataFrame({
-                'Feature': ['step', 'type', 'amount', 'oldbalanceOrg', 
-                           'newbalanceOrig', 'oldbalanceDest', 'newbalanceDest'],
-                'Valeur': features[0]
-            })
+            'Feature': ['step', 'type', 'amount', 'oldbalanceOrg', 
+                    'newbalanceOrig', 'oldbalanceDest', 'newbalanceDest',
+                    'delta_orig', 'delta_dest', 'ratio_amount_orig'],
+            'Valeur': features[0]  # Tous les 10 éléments
+})
+
             st.dataframe(df_raw, use_container_width=True)
         
         with col2:
