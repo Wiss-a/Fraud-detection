@@ -1079,62 +1079,62 @@ if metadata and 'all_models' in metadata:
 else:
     st.info("📊 Statistiques détaillées non disponibles. Exécutez d'abord l'entraînement des modèles.")
 
-# Informations sur le déploiement
-st.markdown("---")
-st.markdown("## ⚙️ Configuration Technique")
+# # Informations sur le déploiement
+# st.markdown("---")
+# st.markdown("## ⚙️ Configuration Technique")
 
-col_tech1, col_tech2, col_tech3 = st.columns(3)
+# col_tech1, col_tech2, col_tech3 = st.columns(3)
 
-with col_tech1:
-    st.markdown("""
-    **🔧 Framework**
-    - Scikit-learn
-    - XGBoost
-    - LightGBM
-    - Pandas / NumPy
-    """)
+# with col_tech1:
+#     st.markdown("""
+#     **🔧 Framework**
+#     - Scikit-learn
+#     - XGBoost
+#     - LightGBM
+#     - Pandas / NumPy
+#     """)
 
-with col_tech2:
-    st.markdown("""
-    **☁️ Infrastructure**
-    - Azure ML (Training)
-    - Mode Local (Inference)
-    - Streamlit (UI)
-    - Python 3.8+
-    """)
+# with col_tech2:
+#     st.markdown("""
+#     **☁️ Infrastructure**
+#     - Azure ML (Training)
+#     - Mode Local (Inference)
+#     - Streamlit (UI)
+#     - Python 3.8+
+#     """)
 
-with col_tech3:
-    st.markdown("""
-    **📊 Performance**
-    - Temps: <100ms
-    - Précision: >95%
-    - Scalable: Oui
-    - Real-time: Oui
-    """)
-st.markdown("""
-## 🎯 À Propos du Système
+# with col_tech3:
+#     st.markdown("""
+#     **📊 Performance**
+#     - Temps: <100ms
+#     - Précision: >95%
+#     - Scalable: Oui
+#     - Real-time: Oui
+#     """)
+# st.markdown("""
+# ## 🎯 À Propos du Système
 
-Ce système de détection de fraude bancaire utilise des algorithmes de Machine Learning
-de pointe pour identifier les transactions suspectes en temps réel.
+# Ce système de détection de fraude bancaire utilise des algorithmes de Machine Learning
+# de pointe pour identifier les transactions suspectes en temps réel.
 
-### 🤖 Modèles Utilisés
+# ### 🤖 Modèles Utilisés
 
-Le système compare plusieurs algorithmes pour sélectionner le plus performant:
+# Le système compare plusieurs algorithmes pour sélectionner le plus performant:
 
-| Modèle | Description | Performance |
-|--------|-------------|-------------|
-| **XGBoost** | Gradient Boosting optimisé | F1: ~95% |
-| **LightGBM** | Gradient Boosting rapide | F1: ~94% |
-| **Random Forest** | Ensemble d'arbres | F1: ~93% |
-| **Logistic Regression** | Baseline linéaire | F1: ~88% |
+# | Modèle | Description | Performance |
+# |--------|-------------|-------------|
+# | **XGBoost** | Gradient Boosting optimisé | F1: ~95% |
+# | **LightGBM** | Gradient Boosting rapide | F1: ~94% |
+# | **Random Forest** | Ensemble d'arbres | F1: ~93% |
+# | **Logistic Regression** | Baseline linéaire | F1: ~88% |
 
-*Dernière mise à jour: {datetime.now().strftime('%d/%m/%Y %H:%M')}*
-""")
-st.markdown("---")
-st.markdown("""
-<div style='text-align: center; color: #7f8c8d; padding: 2rem 0;'>
-    <p style='font-size: 1.1rem;'>🔐 <b>Système Sécurisé</b> | 📊 <b>Azure ML Training</b> | 💻 <b>Mode Local</b></p>
-    <p style='font-size: 0.9rem;'>Développé avec ❤️ pour le Projet CDDA 2024-2025</p>
-    <p style='font-size: 0.8rem; color: #95a5a6;'>© 2024 - Tous droits réservés</p>
-</div>
-""", unsafe_allow_html=True)
+# *Dernière mise à jour: {datetime.now().strftime('%d/%m/%Y %H:%M')}*
+# """)
+# st.markdown("---")
+# st.markdown("""
+# <div style='text-align: center; color: #7f8c8d; padding: 2rem 0;'>
+#     <p style='font-size: 1.1rem;'>🔐 <b>Système Sécurisé</b> | 📊 <b>Azure ML Training</b> | 💻 <b>Mode Local</b></p>
+#     <p style='font-size: 0.9rem;'>Développé avec ❤️ pour le Projet CDDA 2024-2025</p>
+#     <p style='font-size: 0.8rem; color: #95a5a6;'>© 2024 - Tous droits réservés</p>
+# </div>
+# """, unsafe_allow_html=True)
