@@ -164,7 +164,7 @@ def predict_fraud(input_data, threshold=None):
         
         # 🎯 CORRECTION: Niveaux de risque ajustés
         # Basés sur des seuils plus réalistes
-        if fraud_prob >= 0.70:
+        if fraud_prob >= 0.30:
             risk_level = "HIGH"
             recommendation = "🚫 BLOQUER - Fraude hautement probable"
             color = "red"
