@@ -164,7 +164,7 @@ def predict_fraud(input_data, threshold=None):
         
         # 🎯 CORRECTION: Niveaux de risque ajustés
         # Basés sur des seuils plus réalistes
-        if fraud_prob >= 0.30:
+        if fraud_prob >= 0.70:
             risk_level = "HIGH"
             recommendation = "🚫 BLOQUER - Fraude hautement probable"
             color = "red"
@@ -299,7 +299,61 @@ if metadata:
             st.sidebar.metric("ROC-AUC", f"{metrics.get('roc_auc', 0):.3f}")
 
 st.sidebar.markdown("---")
+# À ajouter dans la SIDEBAR (après les métriques du modèle)
 
+st.sidebar.markdown("---")
+st.sidebar.subheader("⚙️ Configuration")
+
+# Sélecteur de seuil
+st.sidebar.markdown("### 🎯 Seuil de Décision")
+
+threshold_option = st.sidebar.radio(
+    "Choisir le mode de seuil:",
+    ["Standard (0.5)", "Optimal Training (0.77)", "Personnalisé"],
+    help="Le seuil détermine à partir de quelle probabilité une transaction est classée comme fraude"
+)
+
+if threshold_option == "Standard (0.5)":
+    custom_threshold = 0.5
+    st.sidebar.info("✅ Seuil équilibré recommandé")
+elif threshold_option == "Optimal Training (0.77)":
+    custom_threshold = optimal_threshold
+    st.sidebar.warning("⚠️ Seuil très élevé - Peut manquer des fraudes")
+else:
+    custom_threshold = st.sidebar.slider(
+        "Seuil personnalisé:",
+        min_value=0.1,
+        max_value=0.9,
+        value=0.5,
+        step=0.05,
+        help="Plus le seuil est élevé, moins il y aura de fausses alertes, mais plus de fraudes manquées"
+    )
+    
+    # Indicateurs visuels
+    if custom_threshold < 0.3:
+        st.sidebar.error("🚨 Très sensible - Beaucoup de fausses alertes")
+    elif custom_threshold < 0.5:
+        st.sidebar.warning("⚠️ Sensible - Plus d'alertes")
+    elif custom_threshold < 0.7:
+        st.sidebar.success("✅ Équilibré - Recommandé")
+    else:
+        st.sidebar.warning("⚠️ Strict - Risque de manquer des fraudes")
+
+st.sidebar.markdown("---")
+
+# Afficher les explications
+with st.sidebar.expander("📖 Comprendre le seuil"):
+    st.write("""
+    **Seuil de décision:**
+    
+    - **0.5 (Standard)**: Équilibre entre détection et fausses alertes
+    - **0.77 (Optimal Training)**: Optimisé pour maximiser F1-score sur données d'entraînement, mais peut être trop strict en production
+    - **Personnalisé**: Ajustez selon vos besoins métier
+    
+    **Impact:**
+    - ⬇️ Seuil bas → Détecte plus de fraudes, mais plus de fausses alertes
+    - ⬆️ Seuil haut → Moins de fausses alertes, mais risque de manquer des fraudes
+    """)
 # Initialiser session state pour le mode démo
 if 'demo_type' not in st.session_state:
     st.session_state.demo_type = None
