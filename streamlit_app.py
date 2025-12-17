@@ -512,8 +512,11 @@ with tab1:
         
         # Encoder le type de transaction
         
+        type_encoding = {
+            'PAYMENT': 1, 'TRANSFER': 2, 'CASH_OUT': 3, 
+            'DEBIT': 4, 'CASH_IN': 5
+        }
         type_encoded = type_encoding.get(transaction_type, 0)
-        
         # Day of week encoding
         day_encoding = {
             'Lundi': 0, 'Mardi': 1, 'Mercredi': 2, 'Jeudi': 3,
@@ -526,11 +529,7 @@ with tab1:
         
         # Construire le vecteur de features (10 features)
         # Encodage du type EXACTEMENT comme au training
-        type_encoding = {
-            'PAYMENT': 1, 'TRANSFER': 2, 'CASH_OUT': 3, 
-            'DEBIT': 4, 'CASH_IN': 5
-        }
-        type_encoded = type_encoding.get(transaction_type, 0)
+       
 
         # Construction STRICTE des features (ordre CRITIQUE)
         features = np.array([[
