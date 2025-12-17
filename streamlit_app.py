@@ -1,3 +1,18 @@
+"""
+================================================================================
+APPLICATION STREAMLIT - DÉTECTION DE FRAUDE
+Mode 100% LOCAL - Sans Azure ML Endpoint
+================================================================================
+
+Installation:
+pip install streamlit pandas numpy plotly scikit-learn joblib xgboost lightgbm
+
+Lancement:
+streamlit run streamlit_app.py
+
+================================================================================
+"""
+
 import streamlit as st
 import pandas as pd
 import numpy as np
@@ -330,6 +345,9 @@ pour détecter les fraudes bancaires.
 - Azure ML (training)
 """)
 
+st.sidebar.markdown("---")
+st.sidebar.markdown("**👨‍💻 Développé par:** [Votre Nom]")
+st.sidebar.markdown("**🎓 Projet CDDA** 2024-2025")
 
 # =============================================================================
 # TABS PRINCIPALES
@@ -356,15 +374,15 @@ with tab1:
         col_demo1, col_demo2, col_demo3 = st.columns(3)
         
         with col_demo1:
-            if st.button("✅ Transaction Légitime", width='stretch'):
+            if st.button("✅ Transaction Légitime", use_container_width=True):
                 st.session_state.demo = "legitimate"
         
         with col_demo2:
-            if st.button("⚠️ Transaction Suspecte", width='stretch'):
+            if st.button("⚠️ Transaction Suspecte", use_container_width=True):
                 st.session_state.demo = "suspicious"
         
         with col_demo3:
-            if st.button("🚨 Fraude Évidente", width='stretch'):
+            if st.button("🚨 Fraude Évidente", use_container_width=True):
                 st.session_state.demo = "fraud"
     
     st.markdown("---")
@@ -377,9 +395,30 @@ with tab1:
         
         # Valeurs par défaut selon le mode démo
         default_values = {
-            'legitimate': {'amount': 150.0, 'old_orig': 5000.0, 'old_dest': 3000.0},
-            'suspicious': {'amount': 15000.0, 'old_orig': 20000.0, 'old_dest': 5000.0},
-            'fraud': {'amount': 50000.0, 'old_orig': 100.0, 'old_dest': 200000.0}
+            'legitimate': {
+                'amount': 150.0, 
+                'old_orig': 5000.0, 
+                'old_dest': 3000.0,
+                'type': 'PAYMENT',
+                'hour': 14,
+                'day': 'Mercredi'
+            },
+            'suspicious': {
+                'amount': 15000.0, 
+                'old_orig': 20000.0, 
+                'old_dest': 5000.0,
+                'type': 'TRANSFER',
+                'hour': 22,
+                'day': 'Samedi'
+            },
+            'fraud': {
+                'amount': 50000.0, 
+                'old_orig': 100.0, 
+                'old_dest': 200000.0,
+                'type': 'CASH_OUT',
+                'hour': 3,
+                'day': 'Dimanche'
+            }
         }
         
         current_demo = st.session_state.get('demo', 'legitimate')
@@ -397,6 +436,7 @@ with tab1:
         transaction_type = st.selectbox(
             "🏦 Type de transaction",
             ["PAYMENT", "TRANSFER", "CASH_OUT", "DEBIT", "CASH_IN"],
+            index=0 if current_demo == 'legitimate' else 1 if current_demo == 'suspicious' else 2,
             help="Nature de la transaction"
         )
         
@@ -431,12 +471,12 @@ with tab1:
             step=100.0
         )
         
-        hour = st.slider("🕐 Heure de la transaction", 0, 23, 14)
+        hour = st.slider("🕐 Heure de la transaction", 0, 23, defaults.get('hour', 14))
         
         day = st.selectbox(
             "📅 Jour de la semaine",
             ["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"],
-            index=2
+            index=["Lundi", "Mardi", "Mercredi", "Jeudi", "Vendredi", "Samedi", "Dimanche"].index(defaults.get('day', 'Mercredi'))
         )
     
     st.markdown("---")
@@ -472,7 +512,7 @@ with tab1:
         analyze_button = st.button(
             "🔍 ANALYSER LA TRANSACTION",
             type="primary",
-            width='stretch'
+            use_container_width=True
         )
     
     if analyze_button:
@@ -490,7 +530,7 @@ with tab1:
         }
         type_encoded = type_encoding.get(transaction_type, 0)
         
-        # Ratio montant / solde
+        # Ratio montant / solde (normalisé)
         amount_to_balance_ratio = amount / old_balance_orig if old_balance_orig > 0 else 0
         
         # Day of week encoding
@@ -500,18 +540,32 @@ with tab1:
         }
         day_encoded = day_encoding.get(day, 0)
         
+        # Normaliser l'heure (0-1)
+        hour_normalized = hour / 23.0
+        
         features = np.array([[
-            amount,                      # Feature 1
-            old_balance_orig,           # Feature 2
-            new_balance_orig,           # Feature 3
-            old_balance_dest,           # Feature 4
-            new_balance_dest,           # Feature 5
-            balance_change_orig,        # Feature 6
-            balance_change_dest,        # Feature 7
-            type_encoded,               # Feature 8
-            hour,                       # Feature 9
-            day_encoded                 # Feature 10
+            amount,                      # Feature 1: Montant
+            old_balance_orig,           # Feature 2: Solde initial émetteur
+            new_balance_orig,           # Feature 3: Nouveau solde émetteur
+            old_balance_dest,           # Feature 4: Solde initial destinataire
+            new_balance_dest,           # Feature 5: Nouveau solde destinataire
+            balance_change_orig,        # Feature 6: Changement solde émetteur
+            balance_change_dest,        # Feature 7: Changement solde destinataire
+            type_encoded,               # Feature 8: Type (1-5)
+            hour_normalized,            # Feature 9: Heure normalisée
+            day_encoded                 # Feature 10: Jour (0-6)
         ]])
+        
+        # Debug: Afficher les features (optionnel)
+        with st.expander("🔬 Debug: Voir les features envoyées"):
+            st.write("Features calculées:")
+            feature_labels = [
+                "Montant", "Solde init. émetteur", "Nouveau solde émetteur",
+                "Solde init. dest.", "Nouveau solde dest.", "Change émetteur",
+                "Change dest.", "Type encodé", "Heure normalisée", "Jour"
+            ]
+            for label, val in zip(feature_labels, features[0]):
+                st.write(f"- {label}: {val}")
         
         # Animation de chargement
         with st.spinner("⏳ Analyse en cours..."):
@@ -591,12 +645,12 @@ with tab1:
                     "Probabilité de Fraude",
                     result['color']
                 )
-                st.plotly_chart(fig_gauge, width='stretch')
+                st.plotly_chart(fig_gauge, use_container_width=True)
             
             with col_viz2:
                 # Distribution
                 fig_dist = create_probability_distribution(result['fraud_probability'])
-                st.plotly_chart(fig_dist, width='stretch')
+                st.plotly_chart(fig_dist, use_container_width=True)
             
             st.markdown("---")
             
@@ -762,10 +816,10 @@ with tab2:
             
             # Aperçu
             with st.expander("👁️ Aperçu des données (10 premières lignes)"):
-                st.dataframe(df.head(10), width='stretch')
+                st.dataframe(df.head(10), use_container_width=True)
             
             # Bouton d'analyse
-            if st.button("🚀 ANALYSER TOUTES LES TRANSACTIONS", type="primary", width='stretch'):
+            if st.button("🚀 ANALYSER TOUTES LES TRANSACTIONS", type="primary", use_container_width=True):
                 
                 progress_bar = st.progress(0)
                 status_text = st.empty()
