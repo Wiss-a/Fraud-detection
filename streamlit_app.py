@@ -139,32 +139,36 @@ def predict_fraud(input_data, threshold=None):
     
     Args:
         input_data: array numpy des features
-        threshold: seuil de décision (si None, utilise optimal_threshold)
+        threshold: seuil de décision (si None, utilise un seuil adapté)
     """
     try:
         if len(input_data.shape) == 1:
             input_data = input_data.reshape(1, -1)
         
-        # Utiliser le seuil optimal si non spécifié
+        # ⚠️ CORRECTION: Utiliser un seuil plus raisonnable
+        # Le seuil de 0.77 du training est trop élevé pour la production
         if threshold is None:
-            threshold = optimal_threshold
+            # Utiliser 0.5 au lieu de optimal_threshold (0.77)
+            # OU ajuster selon vos besoins métier
+            threshold = 0.5  # Seuil standard plus équilibré
         
         # Scaling
         scaled_data = scaler.transform(input_data)
         
-        # Prédiction avec seuil personnalisé
+        # Prédiction
         probabilities = model.predict_proba(scaled_data)[0]
         fraud_prob = float(probabilities[1])
         
-        # Appliquer le seuil optimal au lieu de model.predict()
+        # Appliquer le seuil
         prediction = 1 if fraud_prob >= threshold else 0
         
-        # Déterminer le niveau de risque
-        if fraud_prob >= 0.7:
+        # 🎯 CORRECTION: Niveaux de risque ajustés
+        # Basés sur des seuils plus réalistes
+        if fraud_prob >= 0.70:
             risk_level = "HIGH"
             recommendation = "🚫 BLOQUER - Fraude hautement probable"
             color = "red"
-        elif fraud_prob >= 0.4:
+        elif fraud_prob >= 0.40:
             risk_level = "MEDIUM"
             recommendation = "⚠️ VÉRIFIER - Investigation recommandée"
             color = "orange"
@@ -181,13 +185,14 @@ def predict_fraud(input_data, threshold=None):
             'risk_level': risk_level,
             'recommendation': recommendation,
             'color': color,
-            'threshold_used': threshold
+            'threshold_used': threshold,
+            'model_optimal_threshold': optimal_threshold  # Pour debug
         }
         
     except Exception as e:
         st.error(f"Erreur lors de la prédiction: {str(e)}")
         return None
-
+    
 def create_gauge_chart(value, title, color_gradient):
     """Crée une jauge interactive"""
     fig = go.Figure(go.Indicator(
