@@ -832,7 +832,9 @@ with tab1:
             st.markdown("---")
             st.markdown("## 🎯 RÉSULTAT FINAL")
             # Utiliser seuil 0.5
-            final_decision = 1 if fraud_prob >= 0.5 else 0
+            if delta_orig != amount or ratio_amount_orig > 10 or transaction_type == 'CASH_OUT' and amount > 10000:
+                st.error("🚨 FRAUDE ÉVIDENTE DÉTECTÉE par règles métiers")
+                final_decision = 1 if fraud_prob >= 0.5 else 0
             
             if final_decision == 1:
                 st.markdown(
