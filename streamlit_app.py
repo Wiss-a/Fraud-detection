@@ -162,8 +162,8 @@ def predict_fraud(input_data, threshold=None):
         # Appliquer le seuil
         prediction = 1 if fraud_prob >= threshold else 0
         
-        # 🎯 CORRECTION: Niveaux de risque ajustés
-        # Basés sur des seuils plus réalistes
+        
+
         if fraud_prob >= 0.70:
             risk_level = "HIGH"
             recommendation = "🚫 BLOQUER - Fraude hautement probable"
@@ -584,16 +584,30 @@ with tab1:
         type_encoded = type_encoding.get(transaction_type, 0)
         
         # Construire features
-        features = np.array([[
+        # Features dérivées
+        delta_orig = old_balance_orig - new_balance_orig
+        delta_dest = new_balance_dest - old_balance_dest
+        ratio_amount_orig = amount / (old_balance_orig + 1e-5)  # éviter division par 0
+
+        # Construire features finales
+        features = np.array([[ 
             1,                      # step
             type_encoded,           # type
             amount,                 # amount
             old_balance_orig,       # oldbalanceOrg
             new_balance_orig,       # newbalanceOrig
             old_balance_dest,       # oldbalanceDest
-            new_balance_dest        # newbalanceDest
+            new_balance_dest,       # newbalanceDest
+            delta_orig,             # Δ solde émetteur
+            delta_dest,             # Δ solde destinataire
+            ratio_amount_orig       # ratio montant / solde émetteur
         ]])
-        
+
+        # Détection de fraude “évidente”
+        if delta_orig != amount or ratio_amount_orig > 10 or transaction_type == 'CASH_OUT' and amount > 10000:
+            st.error("🚨 FRAUDE ÉVIDENTE DÉTECTÉE par règles métiers")
+            final_decision = 1
+
         # Afficher les features BRUTES
         col1, col2 = st.columns(2)
         with col1:
@@ -817,7 +831,6 @@ with tab1:
             # ===================================================================
             st.markdown("---")
             st.markdown("## 🎯 RÉSULTAT FINAL")
-            
             # Utiliser seuil 0.5
             final_decision = 1 if fraud_prob >= 0.5 else 0
             
