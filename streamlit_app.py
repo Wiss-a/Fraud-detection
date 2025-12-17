@@ -506,64 +506,62 @@ with tab1:
         )
     
     if analyze_button:
-        # Calculer les features dérivées
-        balance_change_orig = old_balance_orig - new_balance_orig
-        balance_change_dest = new_balance_dest - old_balance_dest
+        # ===================================================================
+        # CONSTRUCTION DES FEATURES (DOIT CORRESPONDRE AU TRAINING!)
+        # ===================================================================
         
-        # Encoder le type de transaction
-        
+        # 1. Encoder le type de transaction (EXACTEMENT comme au training)
         type_encoding = {
-            'PAYMENT': 1, 'TRANSFER': 2, 'CASH_OUT': 3, 
-            'DEBIT': 4, 'CASH_IN': 5
+            'PAYMENT': 1, 
+            'TRANSFER': 2, 
+            'CASH_OUT': 3, 
+            'DEBIT': 4, 
+            'CASH_IN': 5
         }
         type_encoded = type_encoding.get(transaction_type, 0)
-        # Day of week encoding
-        day_encoding = {
-            'Lundi': 0, 'Mardi': 1, 'Mercredi': 2, 'Jeudi': 3,
-            'Vendredi': 4, 'Samedi': 5, 'Dimanche': 6
-        }
-        day_encoded = day_encoding.get(day, 0)
         
-        # Normaliser l'heure (0-1)
-        hour_normalized = hour / 23.0
+        # 2. Step (utiliser 1 comme valeur par défaut en temps réel)
+        step = 1
         
-        # Construire le vecteur de features (10 features)
-        # Encodage du type EXACTEMENT comme au training
-       
-
-        # Construction STRICTE des features (ordre CRITIQUE)
+        # 3. Construire le vecteur de features DANS LE BON ORDRE
+        # ORDRE CRITIQUE: step, type, amount, oldbalanceOrg, newbalanceOrig, oldbalanceDest, newbalanceDest
         features = np.array([[
-            0,                    # step (inconnu en temps réel → 0)
-            type_encoded,         # type
-            amount,               # amount
-            old_balance_orig,     # oldbalanceOrg
-            new_balance_orig,     # newbalanceOrig
-            old_balance_dest,     # oldbalanceDest
-            new_balance_dest      # newbalanceDest
+            step,                    # Feature 0: step
+            type_encoded,            # Feature 1: type (1-5)
+            amount,                  # Feature 2: amount
+            old_balance_orig,        # Feature 3: oldbalanceOrg
+            new_balance_orig,        # Feature 4: newbalanceOrig
+            old_balance_dest,        # Feature 5: oldbalanceDest
+            new_balance_dest         # Feature 6: newbalanceDest
         ]])
-
+        
+        # 4. VALIDATION DES FEATURES
+        st.info(f"🔍 Vecteur de features construit: {features.shape[1]} features")
         
         # Debug: Afficher les features
         with st.expander("🔬 Debug: Voir les features calculées"):
             st.write("**Features envoyées au modèle:**")
             feature_labels = [
-                'step',
-                'type',
-                'amount',
-                'oldbalanceOrg',
-                'newbalanceOrig',
-                'oldbalanceDest',
-                'newbalanceDest'
-            ]            
-
-
+                'step', 'type', 'amount', 
+                'oldbalanceOrg', 'newbalanceOrig', 
+                'oldbalanceDest', 'newbalanceDest'
+            ]
+            
             df_features = pd.DataFrame([features[0]], columns=feature_labels)
-            st.dataframe(df_features)
-
-            st.write("**Après scaling:**")
+            st.dataframe(df_features.style.highlight_max(axis=1))
+            
+            # Afficher après scaling
+            st.write("**Après scaling (RobustScaler):**")
             scaled = scaler.transform(features)
             df_scaled = pd.DataFrame([scaled[0]], columns=feature_labels)
-            st.dataframe(df_scaled)
+            st.dataframe(df_scaled.style.background_gradient(cmap='RdYlGn_r', axis=1))
+            
+            # Statistiques
+            st.write("**Statistiques:**")
+            st.write(f"- Type encodé: {type_encoded} ({transaction_type})")
+            st.write(f"- Montant: {amount:,.2f} €")
+            st.write(f"- Variation solde émetteur: {old_balance_orig - new_balance_orig:,.2f} €")
+            st.write(f"- Variation solde destinataire: {new_balance_dest - old_balance_dest:,.2f} €")
         
         # Animation de chargement
         with st.spinner("⏳ Analyse en cours..."):
@@ -579,7 +577,7 @@ with tab1:
             # Affichage du résultat principal
             st.markdown("## 🎯 Résultat de l'Analyse")
             
-            # Alerte visuelle
+            # Alerte visuelle (CODE RESTE IDENTIQUE)
             if result['is_fraud']:
                 st.markdown(
                     '<div class="alert-fraud">🚨 ALERTE FRAUDE DÉTECTÉE 🚨</div>',
