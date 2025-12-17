@@ -1,57 +1,54 @@
 {
     "best_model": "Random_Forest",
-    "optimal_threshold": 0.1,
+    "optimal_threshold": 0.7699999999999997,
     "feature_names": [
         "step",
         "type",
         "amount",
-        "nameOrig",
         "oldbalanceOrg",
         "newbalanceOrig",
-        "nameDest",
         "oldbalanceDest",
-        "newbalanceDest",
-        "isFlaggedFraud"
+        "newbalanceDest"
     ],
     "all_models": {
         "Logistic_Regression": {
-            "optimal_threshold": 0.5499999999999998,
+            "optimal_threshold": 0.3199999999999999,
             "metrics": {
-                "accuracy": 0.9973600052799895,
-                "precision": 0.9974611282205363,
-                "recall": 0.9959350203248983,
-                "f1_score": 0.9966974900924703,
-                "roc_auc": 0.9994985925570373
+                "accuracy": 0.8933622132755734,
+                "precision": 0.8161386266649424,
+                "recall": 0.9466752666236669,
+                "f1_score": 0.876573817510087,
+                "roc_auc": 0.9604102563487182
             }
         },
         "Random_Forest": {
-            "optimal_threshold": 0.1,
+            "optimal_threshold": 0.7699999999999997,
             "metrics": {
-                "accuracy": 1.0,
-                "precision": 1.0,
-                "recall": 1.0,
-                "f1_score": 1.0,
-                "roc_auc": 1.0
+                "accuracy": 0.9967780064439871,
+                "precision": 0.9964267483409903,
+                "recall": 0.9955150224248879,
+                "f1_score": 0.9959706767312209,
+                "roc_auc": 0.9998609813700932
             }
         },
         "XGBoost": {
-            "optimal_threshold": 0.1,
+            "optimal_threshold": 0.8099999999999996,
             "metrics": {
-                "accuracy": 1.0,
-                "precision": 1.0,
-                "recall": 1.0,
-                "f1_score": 1.0,
-                "roc_auc": 1.0
+                "accuracy": 0.99499001001998,
+                "precision": 0.9919885208657181,
+                "recall": 0.9955150224248879,
+                "f1_score": 0.9937486430437745,
+                "roc_auc": 0.9994765911170443
             }
         },
         "LightGBM": {
-            "optimal_threshold": 0.1,
+            "optimal_threshold": 0.8099999999999996,
             "metrics": {
-                "accuracy": 1.0,
-                "precision": 1.0,
-                "recall": 1.0,
-                "f1_score": 1.0,
-                "roc_auc": 1.0
+                "accuracy": 0.9951160097679804,
+                "precision": 0.992182244876605,
+                "recall": 0.9956350218248908,
+                "f1_score": 0.9939056346675053,
+                "roc_auc": 0.9994498313258434
             }
         }
     }
