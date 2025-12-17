@@ -356,15 +356,15 @@ with tab1:
         col_demo1, col_demo2, col_demo3 = st.columns(3)
         
         with col_demo1:
-            if st.button("✅ Transaction Légitime", use_container_width=True):
+            if st.button("✅ Transaction Légitime", width='content'):
                 st.session_state.demo = "legitimate"
         
         with col_demo2:
-            if st.button("⚠️ Transaction Suspecte", use_container_width=True):
+            if st.button("⚠️ Transaction Suspecte", width='content'):
                 st.session_state.demo = "suspicious"
         
         with col_demo3:
-            if st.button("🚨 Fraude Évidente", use_container_width=True):
+            if st.button("🚨 Fraude Évidente", width='content'):
                 st.session_state.demo = "fraud"
     
     st.markdown("---")
@@ -472,7 +472,7 @@ with tab1:
         analyze_button = st.button(
             "🔍 ANALYSER LA TRANSACTION",
             type="primary",
-            use_container_width=True
+            width='content'
         )
     
     if analyze_button:
@@ -591,12 +591,12 @@ with tab1:
                     "Probabilité de Fraude",
                     result['color']
                 )
-                st.plotly_chart(fig_gauge, use_container_width=True)
+                st.plotly_chart(fig_gauge,width='content')
             
             with col_viz2:
                 # Distribution
                 fig_dist = create_probability_distribution(result['fraud_probability'])
-                st.plotly_chart(fig_dist, use_container_width=True)
+                st.plotly_chart(fig_dist,width='content')
             
             st.markdown("---")
             
@@ -762,10 +762,10 @@ with tab2:
             
             # Aperçu
             with st.expander("👁️ Aperçu des données (10 premières lignes)"):
-                st.dataframe(df.head(10), use_container_width=True)
+                st.dataframe(df.head(10),width='content')
             
             # Bouton d'analyse
-            if st.button("🚀 ANALYSER TOUTES LES TRANSACTIONS", type="primary", use_container_width=True):
+            if st.button("🚀 ANALYSER TOUTES LES TRANSACTIONS", type="primary", width='content'):
                 
                 progress_bar = st.progress(0)
                 status_text = st.empty()
@@ -853,7 +853,7 @@ with tab2:
                         hole=0.4
                     )
                     fig_pie.update_traces(textinfo='percent+label', textfont_size=14)
-                    st.plotly_chart(fig_pie, use_container_width=True)
+                    st.plotly_chart(fig_pie, width='content')
                 
                 with col_chart2:
                     # Histogramme des probabilités
@@ -868,7 +868,7 @@ with tab2:
                         xaxis_title="Probabilité de Fraude",
                         yaxis_title="Nombre de Transactions"
                     )
-                    st.plotly_chart(fig_hist, use_container_width=True)
+                    st.plotly_chart(fig_hist, width='content')
                 
                 # Top transactions suspectes
                 st.markdown("### 🚨 Top 20 Transactions Suspectes")
@@ -890,9 +890,9 @@ with tab2:
                     'Montant': '{:.2f} €',
                     'Fraud_Probability': '{:.1%}'
                 })
-                
-                st.dataframe(styled_df, use_container_width=True)
-                
+
+                st.dataframe(styled_df, width='content')
+
                 # Tableau complet
                 with st.expander("📋 Voir Toutes les Transactions"):
                     st.dataframe(
@@ -900,7 +900,7 @@ with tab2:
                             'Montant': '{:.2f} €',
                             'Fraud_Probability': '{:.1%}'
                         }),
-                        use_container_width=True
+                        width='content'
                     )
                 
                 # Télécharger les résultats
@@ -911,7 +911,7 @@ with tab2:
                     data=csv,
                     file_name=f"fraud_analysis_results_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv",
                     mime="text/csv",
-                    use_container_width=True
+                    width='content'
                 )
                 
         except Exception as e:
@@ -974,7 +974,7 @@ if metadata and 'all_models' in metadata:
             'ROC-AUC': '{:.3f}'
         })
         
-        st.dataframe(styled_comp, use_container_width=True)
+        st.dataframe(styled_comp, width='content')
         
         # Graphiques comparatifs
         st.markdown("---")
@@ -993,7 +993,7 @@ if metadata and 'all_models' in metadata:
                 color_discrete_sequence=['#3498db', '#e74c3c', '#2ecc71', '#f39c12']
             )
             fig_bar.update_layout(yaxis_title="Score", xaxis_title="")
-            st.plotly_chart(fig_bar, use_container_width=True)
+            st.plotly_chart(fig_bar, width='content')
         
         with col_viz2:
             # Radar chart du meilleur modèle
@@ -1020,7 +1020,7 @@ if metadata and 'all_models' in metadata:
                 showlegend=True,
                 title=f"Profil du Modèle {best_model_name}"
             )
-            st.plotly_chart(fig_radar, use_container_width=True)
+            st.plotly_chart(fig_radar, width='content')
 
 else:
     st.info("📊 Statistiques détaillées non disponibles. Exécutez d'abord l'entraînement des modèles.")
