@@ -417,10 +417,10 @@ with tab1:
             old_balance_orig,       # oldbalanceOrg
             new_balance_orig,       # newbalanceOrig
             old_balance_dest,       # oldbalanceDest
-            new_balance_dest,       # newbalanceDest
-            delta_orig,             # Δ solde émetteur
-            delta_dest,             # Δ solde destinataire
-            ratio_amount_orig       # ratio montant / solde émetteur
+            new_balance_dest       # newbalanceDest
+            # delta_orig,             # Δ solde émetteur
+            # delta_dest,             # Δ solde destinataire
+            # ratio_amount_orig       # ratio montant / solde émetteur
         ]])
 
         # Détection de fraude “évidente”
@@ -433,12 +433,10 @@ with tab1:
         with col1:
             st.write("**Features BRUTES:**")
             df_raw = pd.DataFrame({
-            'Feature': ['step', 'type', 'amount', 'oldbalanceOrg', 
-                    'newbalanceOrig', 'oldbalanceDest', 'newbalanceDest',
-                    'delta_orig', 'delta_dest', 'ratio_amount_orig'],
-            'Valeur': features[0]  # Tous les 10 éléments
-})
-
+                'Feature': ['step', 'type', 'amount', 'oldbalanceOrg', 
+                           'newbalanceOrig', 'oldbalanceDest', 'newbalanceDest'],
+                'Valeur': features[0]
+            })
             st.dataframe(df_raw, use_container_width=True)
         
         with col2:
@@ -463,8 +461,7 @@ with tab1:
                 st.write("**Features APRÈS Scaling:**")
                 df_scaled = pd.DataFrame({
                     'Feature': ['step', 'type', 'amount', 'oldbalanceOrg', 
-               'newbalanceOrig', 'oldbalanceDest', 'newbalanceDest',
-               'delta_orig', 'delta_dest', 'ratio_amount_orig'],
+                               'newbalanceOrig', 'oldbalanceDest', 'newbalanceDest'],
                     'Valeur Scalée': scaled_data[0]
                 })
                 st.dataframe(df_scaled, use_container_width=True)
