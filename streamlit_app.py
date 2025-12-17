@@ -463,7 +463,8 @@ with tab1:
                 st.write("**Features APRÈS Scaling:**")
                 df_scaled = pd.DataFrame({
                     'Feature': ['step', 'type', 'amount', 'oldbalanceOrg', 
-                               'newbalanceOrig', 'oldbalanceDest', 'newbalanceDest'],
+               'newbalanceOrig', 'oldbalanceDest', 'newbalanceDest',
+               'delta_orig', 'delta_dest', 'ratio_amount_orig'],
                     'Valeur Scalée': scaled_data[0]
                 })
                 st.dataframe(df_scaled, use_container_width=True)
