@@ -554,11 +554,12 @@ with tab1:
                 'newbalanceOrig',
                 'oldbalanceDest',
                 'newbalanceDest'
-            ]
+            ]            
+            assert features.shape[1] == len(feature_labels)
+
 
             df_features = pd.DataFrame([features[0]], columns=feature_labels)
             st.dataframe(df_features)
-            assert features.shape[1] == scaler.n_features_in_
 
             st.write("**Après scaling:**")
             scaled = scaler.transform(features)
