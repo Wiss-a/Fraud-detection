@@ -345,9 +345,7 @@ pour détecter les fraudes bancaires.
 - Azure ML (training)
 """)
 
-st.sidebar.markdown("---")
-st.sidebar.markdown("**👨‍💻 Développé par:** [Votre Nom]")
-st.sidebar.markdown("**🎓 Projet CDDA** 2024-2025")
+
 
 # =============================================================================
 # TABS PRINCIPALES
