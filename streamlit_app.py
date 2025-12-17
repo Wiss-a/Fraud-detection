@@ -511,10 +511,7 @@ with tab1:
         balance_change_dest = new_balance_dest - old_balance_dest
         
         # Encoder le type de transaction
-        type_encoding = {
-            'PAYMENT': 1, 'TRANSFER': 2, 'CASH_OUT': 3, 
-            'DEBIT': 4, 'CASH_IN': 5
-        }
+        
         type_encoded = type_encoding.get(transaction_type, 0)
         
         # Day of week encoding
@@ -528,18 +525,24 @@ with tab1:
         hour_normalized = hour / 23.0
         
         # Construire le vecteur de features (10 features)
+        # Encodage du type EXACTEMENT comme au training
+        type_encoding = {
+            'PAYMENT': 1, 'TRANSFER': 2, 'CASH_OUT': 3, 
+            'DEBIT': 4, 'CASH_IN': 5
+        }
+        type_encoded = type_encoding.get(transaction_type, 0)
+
+        # Construction STRICTE des features (ordre CRITIQUE)
         features = np.array([[
-            amount,                      # Feature 1
-            old_balance_orig,           # Feature 2
-            new_balance_orig,           # Feature 3
-            old_balance_dest,           # Feature 4
-            new_balance_dest,           # Feature 5
-            balance_change_orig,        # Feature 6
-            balance_change_dest,        # Feature 7
-            type_encoded,               # Feature 8
-            hour_normalized,            # Feature 9
-            day_encoded                 # Feature 10
+            0,                    # step (inconnu en temps réel → 0)
+            type_encoded,         # type
+            amount,               # amount
+            old_balance_orig,     # oldbalanceOrg
+            new_balance_orig,     # newbalanceOrig
+            old_balance_dest,     # oldbalanceDest
+            new_balance_dest      # newbalanceDest
         ]])
+
         
         # Debug: Afficher les features
         with st.expander("🔬 Debug: Voir les features calculées"):
