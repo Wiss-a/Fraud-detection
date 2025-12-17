@@ -374,15 +374,15 @@ with tab1:
         col_demo1, col_demo2, col_demo3 = st.columns(3)
         
         with col_demo1:
-            if st.button("✅ Transaction Légitime", use_container_width=True):
+            if st.button("✅ Transaction Légitime", width='stretch'):
                 st.session_state.demo = "legitimate"
         
         with col_demo2:
-            if st.button("⚠️ Transaction Suspecte", use_container_width=True):
+            if st.button("⚠️ Transaction Suspecte", width='stretch'):
                 st.session_state.demo = "suspicious"
         
         with col_demo3:
-            if st.button("🚨 Fraude Évidente", use_container_width=True):
+            if st.button("🚨 Fraude Évidente", width='stretch'):
                 st.session_state.demo = "fraud"
     
     st.markdown("---")
@@ -512,7 +512,7 @@ with tab1:
         analyze_button = st.button(
             "🔍 ANALYSER LA TRANSACTION",
             type="primary",
-            use_container_width=True
+            width='stretch'
         )
     
     if analyze_button:
@@ -645,12 +645,12 @@ with tab1:
                     "Probabilité de Fraude",
                     result['color']
                 )
-                st.plotly_chart(fig_gauge, use_container_width=True)
+                st.plotly_chart(fig_gauge,width='stretch')
             
             with col_viz2:
                 # Distribution
                 fig_dist = create_probability_distribution(result['fraud_probability'])
-                st.plotly_chart(fig_dist, use_container_width=True)
+                st.plotly_chart(fig_dist, width='stretch')
             
             st.markdown("---")
             
@@ -816,10 +816,10 @@ with tab2:
             
             # Aperçu
             with st.expander("👁️ Aperçu des données (10 premières lignes)"):
-                st.dataframe(df.head(10), use_container_width=True)
+                st.dataframe(df.head(10), width='stretch')
             
             # Bouton d'analyse
-            if st.button("🚀 ANALYSER TOUTES LES TRANSACTIONS", type="primary", use_container_width=True):
+            if st.button("🚀 ANALYSER TOUTES LES TRANSACTIONS", type="primary", width='stretch'):
                 
                 progress_bar = st.progress(0)
                 status_text = st.empty()
