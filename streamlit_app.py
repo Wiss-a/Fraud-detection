@@ -287,7 +287,7 @@ st.sidebar.header("📊 Informations du Modèle")
 
 if metadata:
     st.sidebar.success(f"**Modèle Actif:** {metadata.get('best_model', 'XGBoost')}")
-    st.sidebar.info(f"**Seuil Optimal:** {optimal_threshold:.3f}")
+    st.sidebar.info(f"**Seuil Optimal1111:** {optimal_threshold:.3f}")
     
     if 'all_models' in metadata and metadata['all_models']:
         best_model_name = metadata.get('best_model', list(metadata['all_models'].keys())[0])
